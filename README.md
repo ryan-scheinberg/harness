@@ -10,7 +10,7 @@ cd ~/Documents/harness
 ./setup.sh
 ```
 
-Re-run `./setup.sh` whenever you add, move, or rename anything under `skills/`, `agents/`, `hooks/`, or edit `CLAUDE.md`.
+Re-run `./setup.sh` whenever you add, move, or rename anything under `skills/`, `agents/`, `hooks/`, `schedules/`, or edit `CLAUDE.md`.
 
 ## Layout
 
@@ -19,8 +19,8 @@ Re-run `./setup.sh` whenever you add, move, or rename anything under `skills/`, 
 | `skills/` | SKILL.md directories grouped by skillset folder | `~/.claude/skills/<name>` and `~/.cursor/skills/<name>` (flat) |
 | `agents/` | Subagent definition files (`.md`) | `~/.claude/agents/<name>.md` |
 | `CLAUDE.md` | Global user instructions | `~/.claude/CLAUDE.md` |
-| `hooks/` | Safety gates for destructive bash + MCP writes | Registered in `~/.claude/settings.json` via `hooks/setup-hooks` |
-| `triggers/` | JSON specs for scheduled remote triggers (via `/schedule`) | Not auto-installed; used as version-controlled reference |
+| `hooks/` | Native deny rules + PreToolUse bash gate for destructive commands | Merged into `~/.claude/settings.json` via `hooks/install.sh` |
+| `schedules/` | Local cron jobs (one `.cron` spec per job) with catch-up wrapper | Merged into the user's crontab via `schedules/install.sh` |
 
 ## Safety
 

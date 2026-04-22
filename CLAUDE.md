@@ -34,7 +34,7 @@
 
 **Harness Architecture**
 - Personal agent OS at `~/Documents/harness/` (git-tracked source of truth): `skills/`, `agents/`, `hooks/`, `triggers/`, `CLAUDE.md`, `setup.sh`
-- `setup.sh` symlinks everything into the loaders Claude Code and Cursor read from (`~/.claude/skills/`, `~/.cursor/skills/`, `~/.claude/agents/`, `~/.claude/CLAUDE.md`) and installs safety hooks via `hooks/setup-hooks`
+- `setup.sh` symlinks everything into the loaders Claude Code and Cursor read from (`~/.claude/skills/`, `~/.cursor/skills/`, `~/.claude/agents/`, `~/.claude/CLAUDE.md`) and installs safety hooks via `hooks/install.sh`
 - Skills are shared between Claude Code and Cursor (cursor-delegate uses them)
 - This file lives inside the harness — edits belong in `~/Documents/harness/CLAUDE.md`, not the `~/.claude/` symlink
 

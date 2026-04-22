@@ -1,6 +1,6 @@
 ---
 name: claude-session-manager
-description: Spawn and manage multiple independent Claude --remote-control sessions. Each is controllable from terminal and iOS Claude simultaneously. Use when the user wants to dispatch remote sessions.
+description: Spawn and manage multiple independent Claude --remote-control sessions. Each is controllable from terminal and iOS Claude simultaneously. Use when the user wants to dispatch remote sessions
 ---
 
 Spawn independent `claude --remote-control` sessions in Terminal windows

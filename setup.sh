@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Unified harness installer: skills, agents, global CLAUDE.md, hooks.
+# Unified harness installer: skills, agents, global CLAUDE.md, hooks, schedules.
 # Safe to re-run. For CLAUDE.md and agent files that already exist as real
 # files at the destination, setup.sh verifies content matches the harness
 # source before removing + symlinking; if content differs, it errors out
@@ -122,11 +122,27 @@ install_claude_md() {
 # --- hooks ------------------------------------------------------------------
 
 install_hooks() {
-  local hooks_installer="$REPO_ROOT/hooks/setup-hooks"
+  local hooks_installer="$REPO_ROOT/hooks/install.sh"
   if [[ -x "$hooks_installer" ]]; then
     "$hooks_installer"
   else
     echo "Hooks: no executable installer at $hooks_installer, skipping"
+  fi
+}
+
+# --- schedules --------------------------------------------------------------
+
+install_schedules() {
+  local schedules_installer="$REPO_ROOT/schedules/install.sh"
+  if [[ ! -x "$schedules_installer" ]]; then
+    echo "Schedules: no executable installer at $schedules_installer, skipping"
+    return 0
+  fi
+  # Don't abort the whole install if crontab access fails (e.g. shell lacks
+  # macOS Full Disk Access). Warn and continue — other pieces already succeeded.
+  if ! "$schedules_installer"; then
+    echo "Schedules: installer failed — skipping. On macOS, grant Full Disk Access to the shell running this and re-run schedules/install.sh." >&2
+    return 0
   fi
 }
 
@@ -137,6 +153,7 @@ main() {
   install_agents
   install_claude_md
   install_hooks
+  install_schedules
   echo "Harness install complete"
 }
 

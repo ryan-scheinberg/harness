@@ -15,7 +15,8 @@ This:
 - Discovers every `SKILL.md` under `skills/` (at any depth, skipping `.git/`) and creates **flat** symlinks under `~/.claude/skills/<name>/` and `~/.cursor/skills/<name>/`.
 - Symlinks every `.md` under `agents/` into `~/.claude/agents/<name>.md`.
 - Symlinks `CLAUDE.md` into `~/.claude/CLAUDE.md`.
-- Runs `hooks/setup-hooks` to merge safety hooks into `~/.claude/settings.json`.
+- Runs `hooks/install.sh` to merge safety hooks (native deny rules + a small PreToolUse bash gate) into `~/.claude/settings.json`.
+- Runs `schedules/install.sh` to sync `schedules/*.cron` specs into the user's crontab under a delimited block.
 
 Stale symlinks pointing into `$REPO_ROOT` or legacy `~/Documents/skills/` are pruned before re-linking.
 
@@ -27,6 +28,21 @@ For `CLAUDE.md` and agent `.md` files that already exist as real files at the de
 
 - Two skill folders with the same basename anywhere under `skills/` will fail the script — names must be unique across the whole tree (loaders flatten by basename).
 - Agent file basenames must be unique under `agents/`.
+
+## Hooks
+
+`hooks/settings.json` is the source of truth for `permissions.deny`. `hooks/install.sh` replaces the whole array in `~/.claude/settings.json` on each run, so any deny rule added through the Claude Code UI gets wiped — copy it into `hooks/settings.json` to persist.
+
+When `bash_gate.py` blocks a command, tell Ryan what it wanted to do. If he OKs it, re-run with an inline shell comment `# claude-hook-approved: <what Ryan said>` — bash ignores the comment, the gate allows it through, and the approval shows up in the transcript for audit.
+
+## Schedules
+
+`schedules/` holds local cron jobs. To add a recurring `claude -p` run, use the **`claude-cron`** skill — its `scripts/add.sh` generates the spec and syncs the crontab. Direct spec authoring is supported but rarely needed.
+
+Non-obvious bits:
+- **Crontab edits inside the harness block don't stick.** `schedules/install.sh` rebuilds the delimited `# >>> harness schedules >>>` block on every run. Non-harness crontab entries pass through, but any edit inside the block via `crontab -e` gets wiped — change the `.cron` spec instead.
+- **macOS Full Disk Access.** `crontab` needs FDA granted to the shell running the installer (System Settings → Privacy & Security → Full Disk Access → add Terminal/iTerm). Claude Code's own shell doesn't have FDA; `setup.sh` warns and continues if the schedules installer fails, so the user has to run `./setup.sh` from a terminal they've granted access to.
+- **`state/` is gitignored.** The wrapper only updates the stamp on exit-0 runs, so failures retry on the next tick instead of silently falling behind a day.
 
 ## Editing harness content
 

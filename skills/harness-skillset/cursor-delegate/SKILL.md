@@ -1,6 +1,6 @@
 ---
 name: cursor-delegate
-description: Delegate tasks to Composer 2 agent. Use this different model to code, QA, attack your design, catch blind spots, or explore alternatives.
+description: Delegate tasks to Composer 2 agent. Use this different model to code, QA, attack your design, catch blind spots, or explore alternatives
 ---
 
 Spawn a Composer 2 job on a task. Runs async in background so your chat isn't blocked. There is a max of 4 agents between you and other delegators; extra and `delegate.sh` fails with a clear error; do other work or wait for a job to finish, then retry

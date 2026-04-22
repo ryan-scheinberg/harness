@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 hooks/dist/
+schedules/state/
 
 # Third-party skills (not ours)
 skills/external-skillset/
