@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Spawn a named Claude --remote-control session in a new Terminal window
-# Usage: spawn.sh <name> [workdir]
+# Usage: spawn.sh <name> <role> <workdir>
 # Model is hardcoded — update MODEL below when a new frontier model ships.
 
 set -e
@@ -23,14 +23,16 @@ _reg_write() {
 }
 
 main() {
-  local name=$1 workdir=${2:-$HOME}
+  local name=$1 role=$2 workdir=$3
 
-  if [[ -z "$name" ]]; then
-    echo "Error: name is required"
-    echo "Usage: spawn.sh <name> [workdir]"
-    echo "Example: spawn.sh Worker1 ~/project"
+  if [[ -z "$name" || -z "$role" || -z "$workdir" ]]; then
+    echo "Usage: spawn.sh <name> <role> <workdir>"
+    echo "Example: spawn.sh dev-kiwi dev ~/Documents/skillscake"
     return 1
   fi
+
+  # Positional prompt must come before flags (claude CLI behavior)
+  local cmd="cd '$workdir' && claude /role-$role --remote-control -n '$name' --model '$MODEL'"
 
   # Capture existing PIDs before spawn
   local existing_pids
@@ -41,7 +43,7 @@ main() {
   window_id=$(osascript -e "
     tell application \"Terminal\"
       activate
-      do script \"cd '$workdir' && claude --remote-control -n '$name' --model '$MODEL'\"
+      do script \"$cmd\"
     end tell" | grep -oE '[0-9]+$')
 
   if [[ -z "$window_id" ]]; then
@@ -69,7 +71,7 @@ main() {
   fi
 
   _reg_write "$name" "$window_id" "$pid" "$workdir" "$MODEL"
-  echo "Spawned '$name' — window=$window_id pid=$pid model=$MODEL"
+  echo "Spawned '$name' — window=$window_id pid=$pid model=$MODEL role=$role"
 }
 
 main "$@"

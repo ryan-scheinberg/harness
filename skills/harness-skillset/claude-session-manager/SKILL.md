@@ -7,11 +7,13 @@ Spawn independent `claude --remote-control` sessions in Terminal windows
 
 ## Quick Start
 
-Spawn sessions:
+Spawn a session:
 
 ```bash
-bash scripts/spawn.sh stripe-webhooks-mango ~/project
+bash scripts/spawn.sh stripe-webhooks-mango dev ~/project
 ```
+Required args: session name, role, workdir
+Available roles: `ceo`, `architect`, `dev`
 
 ## Naming
 
@@ -28,6 +30,7 @@ Shut down a session:
 ```bash
 bash scripts/shutdown.sh web-qa-banana
 ```
+Required args: session name
 
 ## How it works
 

@@ -7,3 +7,6 @@ schedules/state/
 
 # Third-party skills (not ours)
 skills/external-skillset/
+
+# Personal — lives locally only
+CLAUDE.md
