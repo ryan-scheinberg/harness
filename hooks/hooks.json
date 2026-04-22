@@ -1,0 +1,89 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/bash_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__(send_message|reply|create_draft|send_draft|delete_message|delete_draft|delete_thread|trash|create_label|update_label|delete_label)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/mcp_write_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__(post_message|postMessage|chat_post|chat_postMessage|update_message|chat_delete|create_channel|archive_channel|invite_to_channel)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/mcp_write_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__(create_issue|update_issue|close_issue|create_merge_request|update_merge_request|merge_merge_request|close_merge_request|create_branch|delete_branch|push_changes|create_commit|create_note|update_note|delete_note|create_release|update_release|delete_release|delete_project|archive_project|create_pipeline|retry_pipeline|cancel_pipeline|trigger_pipeline)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/mcp_write_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__(create_pull_request|update_pull_request|merge_pull_request|close_pull_request|create_issue_comment|update_issue_comment|delete_issue_comment|delete_issue|create_branch_ref|delete_branch_ref|create_tag|delete_tag)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/mcp_write_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__(publish|schedule|unschedule|create_draft_post|update_draft_post|delete_draft_post|create_thread|update_thread|delete_thread)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/mcp_write_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__(create_event|update_event|delete_event|create_calendar|delete_calendar)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/mcp_write_gate.py"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*__(create_task|update_task|delete_task|create_project|update_project|delete_project|complete_task)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/mcp_write_gate.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/post_log.py"
+          }
+        ]
+      }
+    ]
+  }
+}
