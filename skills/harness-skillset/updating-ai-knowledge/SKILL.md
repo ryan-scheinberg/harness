@@ -9,13 +9,14 @@ You hit something the knowledge base should have warned you about. Before editin
 
 ## Where it belongs
 
-- **Skill** (`~/Documents/skills/`) → cross-repo knowledge. Test: *"Would this be true in another repo?"* Group by skillset folder (`project-skillset/`, `harness-skillset/`, `skillscake-skillset/`). Run `./setup-skills.sh` to refresh symlinks after adding or moving a skill directory
+- **Skill** (`~/Documents/harness/skills/`) → cross-repo knowledge about tools, platforms, workflows. Test: *"Would this be true in another repo?"* Group by skillset folder (`project-skillset/`, `harness-skillset/`, `skillscake-skillset/`). Run `./setup.sh` from the harness repo root to refresh symlinks after adding or moving a skill directory
+- **Global CLAUDE.md** (`~/Documents/harness/CLAUDE.md`, symlinked to `~/.claude/CLAUDE.md`) → user-scope operating principles that every main-session Claude inherits. Distinct from `AGENTS.md` (per-repo) and subagent bodies (per-agent); note subagents do **not** inherit this file
 - **AGENTS.md** (at the affected repo root) → repo-specific context. Nearest file wins; most agents read it automatically
-- **Agent** (`~/.claude/agents/<name>.md`) → fixes to a subagent's behavior (fires at the wrong time, wrong output format, missing domain coverage). You're editing *how the subagent thinks*, not facts it looks up
+- **Agent** (`~/Documents/harness/agents/<name>.md`, symlinked to `~/.claude/agents/`) → fixes to a subagent's behavior (fires at the wrong time, wrong output format, missing domain coverage). You're editing *how the subagent thinks*, not facts it looks up
 
 ## Making the edit
 
-**Read the whole file first** (skill body, `AGENTS.md`, or agent). Then make the smallest edit that closes the gap. Preserve everything accurate. Restructure only if the structure itself caused the confusion
+**Read the whole file first** (skill body, global `CLAUDE.md`, `AGENTS.md`, or agent). Then make the smallest edit that closes the gap. Preserve everything accurate. Restructure only if the structure itself caused the confusion
 
 **Write with reasoning, not just rules.** *"Use `--runInBand` because tests share a database and parallel runs corrupt each other"* is durable. *"Always use `--runInBand`"* is fragile — it breaks the moment the flag name changes or someone needs to know why. Reasoning survives cases your example doesn't cover
 
@@ -37,6 +38,7 @@ If you reach for all-caps emphasis or absolute prohibitions, pause and ask wheth
 
 - Jira skill has a wrong field name → skill
 - Repo needs `npm ci` before tests but `AGENTS.md` doesn't say so → AGENTS.md
+- A new cross-session operating rule you want every main Claude to follow → global `CLAUDE.md`
 - `verify` agent misses a domain (never probes migrations) → agent (extend the domain playbook)
 - `verify` description so broad it fires on trivial tasks → agent (tighten `description:`)
 - Terraform module changed its variable interface → skill

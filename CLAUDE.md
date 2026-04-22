@@ -32,9 +32,11 @@
 - Imprecision is a blocker
 - Constraints matter: employment, compliance, unit economics
 
-**Skills Architecture**
-- Skills live in ~/Documents/skills/ (source of truth) and are symlinked flat to ~/.claude/skills/ and ~/.cursor/skills/
-- When delegating to Cursor via cursor-delegate, Cursor has access to the same skills and will use skills based on context.
+**Harness Architecture**
+- Personal agent OS at `~/Documents/harness/` (git-tracked source of truth): `skills/`, `agents/`, `hooks/`, `triggers/`, `CLAUDE.md`, `setup.sh`
+- `setup.sh` symlinks everything into the loaders Claude Code and Cursor read from (`~/.claude/skills/`, `~/.cursor/skills/`, `~/.claude/agents/`, `~/.claude/CLAUDE.md`) and installs safety hooks via `hooks/setup-hooks`
+- Skills are shared between Claude Code and Cursor (cursor-delegate uses them)
+- This file lives inside the harness — edits belong in `~/Documents/harness/CLAUDE.md`, not the `~/.claude/` symlink
 
 **Pinging Ryan**
 - Call `PushNotification` before ending your turn when: (a) you're blocked on his input, or (b) a substantial task just finished and he may have walked away. Turn-end does NOT auto-ping — if you don't call it, he hears nothing
@@ -42,6 +44,6 @@
 - In --remote-control sessions, *always* fire `PushNotification` in the same response as any `AskUserQuestion` call. Do the same for other calls that will end your turn based on the rules above
 
 **Research Approach**
-- Read codebases (setup-skills, AGENTS.md) before asking questions
+- Read codebases (`setup.sh`, `AGENTS.md`) before asking questions
 - Many design answers live in script implementations and guidance files, not in chat context
 - Codebase truth > assumptions; if unsure, grep and read
