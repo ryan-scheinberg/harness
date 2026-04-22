@@ -32,7 +32,7 @@ If you reach for all-caps emphasis or absolute prohibitions, pause and ask wheth
 - **Agent body** — the agent's system prompt. Keep it tight (~30–40 lines). Don't paste memory scaffolding into the body; the `memory:` frontmatter auto-injects it at runtime
 - **Agent memory** — lives at `~/.claude/agent-memory/<name>/`, auto-managed when the `memory:` field is set. Isolated per agent; does not inherit parent `MEMORY.md`. Only enable when the agent genuinely benefits from cross-session state — for judgment agents like verifiers, memory can bias toward stale priors
 - **Agent user-interaction** — subagents should not call `AskUserQuestion` or `PushNotification` directly; they return a single message to the parent, which is responsible for any user-facing pause or ping. Add both to `disallowedTools:` to enforce the contract structurally
-- **Agent CLAUDE.md context** — subagents do not inherit global `~/.claude/CLAUDE.md` or project `CLAUDE.md`; their system prompt is only the agent body plus runtime injections. If an agent needs that context, duplicate the relevant rules into the body or have it `Read` the file explicitly
+- **Agent CLAUDE.md context** — subagents do not inherit global `~/.claude/CLAUDE.md` or project `CLAUDE.md`; their system prompt is only the agent body plus runtime injections. If an agent needs that context, duplicate the relevant rules into the body
 
 ## Example calls
 
