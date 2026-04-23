@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Unified harness installer: skills, agents, global CLAUDE.md, hooks, schedules.
-# Safe to re-run. For CLAUDE.md and agent files that already exist as real
-# files at the destination, setup.sh verifies content matches the harness
-# source before removing + symlinking; if content differs, it errors out
-# so you can reconcile first.
+# Unified harness installer: skills, agents, global CLAUDE.md, schedules.
+# Hooks are installed separately via hooks/install.sh — not run from here.
+# This repo is the source of truth: setup.sh unconditionally replaces the
+# destinations with symlinks back here.
 
 set -e
 
@@ -17,28 +16,10 @@ OLD_LOCATIONS=("$HOME/Documents/skills")
 
 # --- shared helpers ---------------------------------------------------------
 
-# Replace dest with symlink to src, but only if a real file at dest matches
-# src byte-for-byte. If it differs, abort so the user can reconcile.
-adopt_file() {
-  local dest="$1" src="$2" label="$3"
-  if [[ -L "$dest" ]]; then
-    rm "$dest"
-    ln -s "$src" "$dest"
-    return 0
-  fi
-  if [[ -e "$dest" ]]; then
-    if diff -q "$dest" "$src" >/dev/null 2>&1; then
-      rm "$dest"
-      ln -s "$src" "$dest"
-    else
-      echo "error: $label at $dest differs from $src" >&2
-      echo "  Reconcile with: diff $dest $src" >&2
-      echo "  Copy the canonical version into $src, then re-run setup.sh" >&2
-      return 1
-    fi
-    return 0
-  fi
+link_file() {
+  local dest="$1" src="$2"
   mkdir -p "$(dirname "$dest")"
+  rm -f "$dest"
   ln -s "$src" "$dest"
 }
 
@@ -104,7 +85,7 @@ install_agents() {
   for agent in "$src_dir"/*.md; do
     [[ -f "$agent" ]] || continue
     dest="$AGENT_LINK_ROOT/$(basename "$agent")"
-    adopt_file "$dest" "$agent" "agent $(basename "$agent")"
+    link_file "$dest" "$agent"
     count=$((count+1))
   done
   echo "Agents: $count symlinked into $AGENT_LINK_ROOT"
@@ -115,19 +96,8 @@ install_agents() {
 install_claude_md() {
   local src="$REPO_ROOT/CLAUDE.md"
   [[ -f "$src" ]] || { echo "CLAUDE.md: no source, skipping"; return 0; }
-  adopt_file "$CLAUDE_MD_DEST" "$src" "global CLAUDE.md"
+  link_file "$CLAUDE_MD_DEST" "$src"
   echo "CLAUDE.md: symlinked $CLAUDE_MD_DEST"
-}
-
-# --- hooks ------------------------------------------------------------------
-
-install_hooks() {
-  local hooks_installer="$REPO_ROOT/hooks/install.sh"
-  if [[ -x "$hooks_installer" ]]; then
-    "$hooks_installer"
-  else
-    echo "Hooks: no executable installer at $hooks_installer, skipping"
-  fi
 }
 
 # --- schedules --------------------------------------------------------------
@@ -152,7 +122,6 @@ main() {
   install_skills
   install_agents
   install_claude_md
-  install_hooks
   install_schedules
   echo "Harness install complete"
 }

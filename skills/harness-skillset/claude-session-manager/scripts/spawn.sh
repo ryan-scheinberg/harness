@@ -36,7 +36,7 @@ main() {
 
   # Capture existing PIDs before spawn
   local existing_pids
-  existing_pids=$(pgrep -f "claude --remote-control" 2>/dev/null || true)
+  existing_pids=$(pgrep -f -- "--remote-control" 2>/dev/null || true)
 
   # Spawn in new Terminal window via AppleScript
   local window_id
@@ -55,7 +55,7 @@ main() {
 
   # Find the newly spawned process (not in existing list)
   local all_pids
-  all_pids=$(pgrep -f "claude --remote-control" 2>/dev/null || true)
+  all_pids=$(pgrep -f -- "--remote-control" 2>/dev/null || true)
 
   local pid
   while IFS= read -r p; do

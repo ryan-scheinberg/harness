@@ -1,16 +1,17 @@
 # Harness
 
-Source of truth for the Claude Code / Cursor harness: skills, subagents, the global `CLAUDE.md`, and safety hooks. A single `setup.sh` symlinks everything into the locations the tools expect.
+Source of truth for the Claude Code / Cursor harness: skills, subagents, the global `CLAUDE.md`, and safety hooks. `setup.sh` symlinks everything into the locations the tools expect. Safety hooks are installed separately via `hooks/install.sh` — they are intentionally opt-in and not part of `setup.sh`.
 
 ## Install
 
 ```bash
 git clone <this-repo-url> ~/Documents/harness
 cd ~/Documents/harness
-./setup.sh
+./setup.sh           # skills, agents, CLAUDE.md, schedules
+./hooks/install.sh   # safety hooks (opt-in, run once)
 ```
 
-Re-run `./setup.sh` whenever you add, move, or rename anything under `skills/`, `agents/`, `hooks/`, `schedules/`, or edit `CLAUDE.md`.
+Re-run `./setup.sh` whenever you add, move, or rename anything under `skills/`, `agents/`, `schedules/`, or edit `CLAUDE.md`. Re-run `./hooks/install.sh` whenever you change anything under `hooks/`.
 
 ## Layout
 
@@ -19,12 +20,8 @@ Re-run `./setup.sh` whenever you add, move, or rename anything under `skills/`, 
 | `skills/` | SKILL.md directories grouped by skillset folder | `~/.claude/skills/<name>` and `~/.cursor/skills/<name>` (flat) |
 | `agents/` | Subagent definition files (`.md`) | `~/.claude/agents/<name>.md` |
 | `CLAUDE.md` | Global user instructions | `~/.claude/CLAUDE.md` |
-| `hooks/` | Native deny rules + PreToolUse bash gate for destructive commands | Merged into `~/.claude/settings.json` via `hooks/install.sh` |
+| `hooks/` | Native deny rules + PreToolUse bash gate for destructive commands | Merged into `~/.claude/settings.json` via `hooks/install.sh` (run manually) |
 | `schedules/` | Local cron jobs (one `.cron` spec per job) with catch-up wrapper | Merged into the user's crontab via `schedules/install.sh` |
-
-## Safety
-
-`setup.sh` treats `CLAUDE.md` and agent files cautiously: if a real file already exists at the destination, it diffs against the harness source and only replaces it when they are byte-identical. If they differ, setup.sh errors out with reconciliation instructions — the harness will never silently overwrite local edits.
 
 ## License
 

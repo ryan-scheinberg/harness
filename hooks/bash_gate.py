@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Ask-tier bash gate. Pairs with native permissions.deny for hard blocks.
 
-Fires on PreToolUse for Bash. On pattern match, exits 2 so Claude asks Ryan.
+Fires on PreToolUse for Bash. On pattern match, exits 2 so Claude asks the user.
 Approval escape hatch: include `# claude-hook-approved: <reason>` anywhere
 in the command to bypass the gate on re-issue.
 
@@ -81,8 +81,8 @@ def main() -> int:
             print(
                 f"REQUIRES APPROVAL: {label}.\n"
                 f"Command: {cmd}\n"
-                "Ask Ryan. When he says ok, re-run with a comment anywhere in the command:\n"
-                "    # claude-hook-approved: <what Ryan said>",
+                "Ask the user. When they say ok, re-run with a comment anywhere in the command:\n"
+                "    # claude-hook-approved: <what the user said>",
                 file=sys.stderr,
             )
             return 2
