@@ -1,27 +1,32 @@
 # Harness
 
-Source of truth for the Claude Code / Cursor harness: skills, subagents, the global `CLAUDE.md`, and safety hooks. `setup.sh` symlinks everything into the locations the tools expect. Safety hooks are installed separately via `hooks/install.sh` — they are intentionally opt-in and not part of `setup.sh`.
+Source of truth for the Claude Code / Cursor harness: skills, subagents, the global `CLAUDE.md`, safety hooks, and local schedules. Each top-level dir has its own `install.sh` — nothing is bundled, every installer is opt-in. The repo is the source of truth; installers unconditionally overwrite their destinations.
 
 ## Install
 
 ```bash
 git clone <this-repo-url> ~/Documents/harness
 cd ~/Documents/harness
-./setup.sh           # skills, agents, CLAUDE.md, schedules
-./hooks/install.sh   # safety hooks (opt-in, run once)
+
+./skills/install.sh                    # symlinks into ~/.claude/skills and ~/.cursor/skills
+./agents/install.sh                    # symlinks into ~/.claude/agents
+ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md   # one-time: global user instructions
+
+./hooks/install.sh                     # optional: safety hooks (writes ~/.claude/settings.json)
+./schedules/install.sh                 # optional: local cron jobs (writes crontab)
 ```
 
-Re-run `./setup.sh` whenever you add, move, or rename anything under `skills/`, `agents/`, `schedules/`, or edit `CLAUDE.md`. Re-run `./hooks/install.sh` whenever you change anything under `hooks/`.
+Re-run each installer whenever you add, move, or rename anything in its directory. `CLAUDE.md` is a plain symlink — no re-install needed.
 
 ## Layout
 
-| Path | What it is | Where it symlinks to |
-| --- | --- | --- |
-| `skills/` | SKILL.md directories grouped by skillset folder | `~/.claude/skills/<name>` and `~/.cursor/skills/<name>` (flat) |
-| `agents/` | Subagent definition files (`.md`) | `~/.claude/agents/<name>.md` |
-| `CLAUDE.md` | Global user instructions | `~/.claude/CLAUDE.md` |
-| `hooks/` | Native deny rules + PreToolUse bash gate for destructive commands | Merged into `~/.claude/settings.json` via `hooks/install.sh` (run manually) |
-| `schedules/` | Local cron jobs (one `.cron` spec per job) with catch-up wrapper | Merged into the user's crontab via `schedules/install.sh` |
+| Path | What it is | Installed by | Where it goes |
+| --- | --- | --- | --- |
+| `skills/` | SKILL.md directories grouped by skillset folder | `skills/install.sh` | `~/.claude/skills/<name>` and `~/.cursor/skills/<name>` (flat) |
+| `agents/` | Subagent definition files (`.md`) | `agents/install.sh` | `~/.claude/agents/<name>.md` |
+| `CLAUDE.md` | Global user instructions | manual `ln -s` | `~/.claude/CLAUDE.md` |
+| `hooks/` | Native deny rules + PreToolUse bash gate | `hooks/install.sh` | Merged into `~/.claude/settings.json` |
+| `schedules/` | Local cron jobs with catch-up wrapper | `schedules/install.sh` | Merged into the user's crontab |
 
 ## License
 

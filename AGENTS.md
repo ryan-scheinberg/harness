@@ -1,25 +1,21 @@
 # Harness repo — agent notes
 
-This repository is the **source of truth** for the user's Claude Code / Cursor harness. It bundles skills, subagents, hooks, and the global `CLAUDE.md` under one installer so the harness is reproducible and version-controlled in one place.
+This repository is the **source of truth** for the user's Claude Code / Cursor harness. Skills, subagents, the global `CLAUDE.md`, safety hooks, and local schedules all live here and are version-controlled in one place.
 
 ## Install / refresh
 
-From the repo root (`setup.sh` is a Bash 3.2-compatible script so it runs on macOS's default shell):
+There is no single root installer. Each top-level directory owns its own `install.sh` — nothing is bundled, every installer is opt-in:
 
-```bash
-./setup.sh
-```
+| Command | What it does |
+| --- | --- |
+| `./skills/install.sh` | Discovers every `SKILL.md` under `skills/` (any depth, skipping `.git/`) and flat-symlinks each directory into `~/.claude/skills/<name>/` and `~/.cursor/skills/<name>/`. Prunes stale symlinks pointing into `$REPO_ROOT` or legacy `~/Documents/skills/`. |
+| `./agents/install.sh` | Symlinks every `.md` under `agents/` into `~/.claude/agents/<name>.md`. Prunes stale symlinks pointing into `agents/`. |
+| `./hooks/install.sh` | Merges safety hooks (native deny rules + PreToolUse bash gate) into `~/.claude/settings.json`. Writes to user settings — opt-in. |
+| `./schedules/install.sh` | Syncs `schedules/*.cron` specs into the user's crontab under a delimited block. Writes to crontab — opt-in, and needs macOS Full Disk Access. |
 
-This:
+`CLAUDE.md` is a one-time manual symlink: `ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md`. No installer needed — it's one file and you only do it once.
 
-- Discovers every `SKILL.md` under `skills/` (at any depth, skipping `.git/`) and creates **flat** symlinks under `~/.claude/skills/<name>/` and `~/.cursor/skills/<name>/`.
-- Symlinks every `.md` under `agents/` into `~/.claude/agents/<name>.md`.
-- Symlinks `CLAUDE.md` into `~/.claude/CLAUDE.md`.
-- Runs `schedules/install.sh` to sync `schedules/*.cron` specs into the user's crontab under a delimited block.
-
-Safety hooks are **not** part of `setup.sh` — they are installed separately by running `./hooks/install.sh` manually by the user. This keeps hook installation opt-in and independent of routine setup re-runs.
-
-Stale symlinks pointing into `$REPO_ROOT` or legacy `~/Documents/skills/` are pruned before re-linking.
+Installers are Bash 3.2-compatible so they run on macOS's default shell. Re-run an installer after adding, moving, or renaming anything in its directory. The repo is the source of truth: installers unconditionally overwrite their destinations — no adoption check, no diff dance.
 
 ## Constraints
 
@@ -38,7 +34,7 @@ When `bash_gate.py` blocks a command, tell the user what it wanted to do. If the
 
 Non-obvious bits:
 - **Crontab edits inside the harness block don't stick.** `schedules/install.sh` rebuilds the delimited `# >>> harness schedules >>>` block on every run. Non-harness crontab entries pass through, but any edit inside the block via `crontab -e` gets wiped — change the `.cron` spec instead.
-- **macOS Full Disk Access.** `crontab` needs FDA granted to the shell running the installer (System Settings → Privacy & Security → Full Disk Access → add Terminal/iTerm). Claude Code's own shell doesn't have FDA; `setup.sh` warns and continues if the schedules installer fails, so the user has to run `./setup.sh` from a terminal they've granted access to.
+- **macOS Full Disk Access.** `crontab` needs FDA granted to the shell running the installer (System Settings → Privacy & Security → Full Disk Access → add Terminal/iTerm). Claude Code's own shell doesn't have FDA — run `./schedules/install.sh` from a terminal you've granted access to.
 - **`state/` is gitignored.** The wrapper only updates the stamp on exit-0 runs, so failures retry on the next tick instead of silently falling behind a day.
 
 ## Editing harness content
