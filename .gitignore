@@ -5,8 +5,8 @@ __pycache__/
 hooks/dist/
 schedules/state/
 
-# Third-party skills (not ours)
+# Third-party skills
 skills/external-skillset/
 
-# Personal — lives locally only
+# Personal
 CLAUDE.md

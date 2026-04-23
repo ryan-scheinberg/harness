@@ -5,11 +5,11 @@ description: Guidance for updating agent-facing files (skills, AGENTS.md, subage
 
 ## The friction
 
-You hit something the knowledge base should have warned you about. Before editing anything, articulate the gap in one sentence: *"This file says X, but the correct behavior is Y."* If you can't say that yet, you don't have the fix yet — synthesize from what the session already produced
+You hit something the knowledge base should have warned you about. Before editing anything, articulate the gap in one sentence: *"This file says X, but the correct behavior is Y."* If you can't say that yet, you don't have the fix yet. Synthesize from what the session already produced
 
 ## Where it belongs
 
-- **Skill** (`~/Documents/harness/skills/`) → cross-repo knowledge about tools, platforms, workflows. Test: *"Would this be true in another repo?"* Group by skillset folder (`project-skillset/`, `harness-skillset/`, `skillscake-skillset/`). Run `./setup.sh` from the harness repo root to refresh symlinks after adding or moving a skill directory
+- **Skill** (`~/Documents/harness/skills/`) → cross-repo knowledge about tools, platforms, workflows. Test: *"Would this be true in another repo?"* Group by skillset folder (`project-skillset/`, `harness-skillset/`, `skillscake-skillset/`). Run `./skills/install.sh` from the harness repo root to refresh symlinks after adding or moving a skill directory
 - **Global CLAUDE.md** (`~/Documents/harness/CLAUDE.md`, symlinked to `~/.claude/CLAUDE.md`) → user-scope operating principles that every main-session Claude inherits. Distinct from `AGENTS.md` (per-repo) and subagent bodies (per-agent); note subagents do **not** inherit this file
 - **AGENTS.md** (at the affected repo root) → repo-specific context. Nearest file wins; most agents read it automatically
 - **Agent** (`~/Documents/harness/agents/<name>.md`, symlinked to `~/.claude/agents/`) → fixes to a subagent's behavior (fires at the wrong time, wrong output format, missing domain coverage). You're editing *how the subagent thinks*, not facts it looks up
@@ -18,7 +18,7 @@ You hit something the knowledge base should have warned you about. Before editin
 
 **Read the whole file first** (skill body, global `CLAUDE.md`, `AGENTS.md`, or agent). Then make the smallest edit that closes the gap. Preserve everything accurate. Restructure only if the structure itself caused the confusion
 
-**Write with reasoning, not just rules.** *"Use `--runInBand` because tests share a database and parallel runs corrupt each other"* is durable. *"Always use `--runInBand`"* is fragile — it breaks the moment the flag name changes or someone needs to know why. Reasoning survives cases your example doesn't cover
+**Write with reasoning, not just rules.** *"Use `--runInBand` because tests share a database and parallel runs corrupt each other"* is durable. *"Always use `--runInBand`"* is fragile: it breaks the moment the flag name changes or someone needs to know why. Reasoning survives cases your example doesn't cover
 
 If you reach for all-caps emphasis or absolute prohibitions, pause and ask whether explaining the consequence would be clearer
 
@@ -29,8 +29,7 @@ If you reach for all-caps emphasis or absolute prohibitions, pause and ask wheth
 - **Skill `name:`** — don't change; tied to symlinks and the loader
 - **Skill `description:`** — edit only if triggering is wrong (fires when it shouldn't, or doesn't fire when it should)
 - **Agent `description:`** — LLM-only routing signal (not shown to users). Keep it short and trigger-phrased ("Use when X", "Proactively Y"). Edit it when the agent fires wrong
-- **Agent body** — the agent's system prompt. Keep it tight (~30–40 lines). Don't paste memory scaffolding into the body; the `memory:` frontmatter auto-injects it at runtime
-- **Agent memory** — lives at `~/.claude/agent-memory/<name>/`, auto-managed when the `memory:` field is set. Isolated per agent; does not inherit parent `MEMORY.md`. Only enable when the agent genuinely benefits from cross-session state — for judgment agents like verifiers, memory can bias toward stale priors
+- **Agent body** — the agent's system prompt. Keep it tight (~30–40 lines)
 - **Agent user-interaction** — subagents should not call `AskUserQuestion` or `PushNotification` directly; they return a single message to the parent, which is responsible for any user-facing pause or ping. Add both to `disallowedTools:` to enforce the contract structurally
 - **Agent CLAUDE.md context** — subagents do not inherit global `~/.claude/CLAUDE.md` or project `CLAUDE.md`; their system prompt is only the agent body plus runtime injections. If an agent needs that context, duplicate the relevant rules into the body
 

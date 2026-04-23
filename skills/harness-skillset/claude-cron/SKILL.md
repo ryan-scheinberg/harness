@@ -29,7 +29,7 @@ bash scripts/add.sh daily-angle "0 9 * * *" "/skillscake-marketing-ideation"
 bash scripts/list.sh
 ```
 
-Shows each job's schedule and last-successful-run timestamp.
+Shows each job's schedule and last-successful-run timestamp
 
 ## Remove a scheduled run
 

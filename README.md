@@ -1,6 +1,6 @@
 # Harness
 
-Source of truth for the Claude Code / Cursor harness: skills, subagents, the global `CLAUDE.md`, safety hooks, and local schedules. Each top-level dir has its own `install.sh` — nothing is bundled, every installer is opt-in. The repo is the source of truth; installers unconditionally overwrite their destinations.
+Source of truth for the Claude Code / Cursor harness: skills, subagents, the global `CLAUDE.md`, safety hooks, and local schedules. Each top-level dir has its own `install.sh`. Nothing is bundled, every installer is opt-in, and installers unconditionally overwrite their destinations
 
 ## Install
 
@@ -16,7 +16,7 @@ ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md   # one-time: global user instructio
 ./schedules/install.sh                 # optional: local cron jobs (writes crontab)
 ```
 
-Re-run each installer whenever you add, move, or rename anything in its directory. `CLAUDE.md` is a plain symlink — no re-install needed.
+Re-run each installer whenever you add, move, or rename anything in its directory. `CLAUDE.md` is a plain symlink, no re-install needed
 
 ## Layout
 
