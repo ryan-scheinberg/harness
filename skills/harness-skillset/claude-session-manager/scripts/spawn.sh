@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Spawn a named Claude --remote-control session in a new Terminal window
 # Usage: spawn.sh <name> <role> <workdir>
+# Manager is always the spawner ($CLAUDE_SESSION_NAME); unset when spawned from the user's terminal.
 # Model is hardcoded — update MODEL below when a new frontier model ships.
 
 set -e
@@ -13,17 +14,18 @@ _reg_init() {
 }
 
 _reg_write() {
-  local name=$1 window_id=$2 pid=$3 workdir=$4 model=$5
+  local name=$1 window_id=$2 pid=$3 workdir=$4 model=$5 manager=$6
   _reg_init
   local tmp=$(mktemp)
   jq --arg n "$name" --argjson w "$window_id" --argjson p "$pid" \
-     --arg d "$workdir" --arg m "$model" --arg t "$(date -u +%FT%TZ)" \
-     '.[$n] = {window_id: $w, pid: $p, workdir: $d, model: $m, started: $t}' \
+     --arg d "$workdir" --arg m "$model" --arg mgr "$manager" --arg t "$(date -u +%FT%TZ)" \
+     '.[$n] = {window_id: $w, pid: $p, workdir: $d, model: $m, manager: $mgr, started: $t}' \
      "$REGISTRY" > "$tmp" && mv "$tmp" "$REGISTRY"
 }
 
 main() {
   local name=$1 role=$2 workdir=$3
+  local manager=$CLAUDE_SESSION_NAME
 
   if [[ -z "$name" || -z "$role" || -z "$workdir" ]]; then
     echo "Usage: spawn.sh <name> <role> <workdir>"
@@ -31,8 +33,9 @@ main() {
     return 1
   fi
 
-  # Positional prompt must come before flags (claude CLI behavior)
-  local cmd="cd '$workdir' && claude /role-$role --remote-control -n '$name' --model '$MODEL'"
+  # Export session identity + manager so request-manager / respond-to-request can target.
+  # Positional prompt must come before flags (claude CLI behavior).
+  local cmd="export CLAUDE_SESSION_NAME='$name' CLAUDE_SESSION_MANAGER='$manager'; cd '$workdir' && claude /role-$role --remote-control -n '$name' --model '$MODEL'"
 
   # Capture existing PIDs before spawn
   local existing_pids
@@ -70,8 +73,8 @@ main() {
     return 1
   fi
 
-  _reg_write "$name" "$window_id" "$pid" "$workdir" "$MODEL"
-  echo "Spawned '$name' — window=$window_id pid=$pid model=$MODEL role=$role"
+  _reg_write "$name" "$window_id" "$pid" "$workdir" "$MODEL" "$manager"
+  echo "Spawned '$name' — window=$window_id pid=$pid model=$MODEL role=$role manager=${manager:-none}"
 }
 
 main "$@"

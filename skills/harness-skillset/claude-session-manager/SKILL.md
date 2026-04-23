@@ -10,10 +10,12 @@ Spawn independent `claude --remote-control` sessions in Terminal windows
 Spawn a session:
 
 ```bash
-bash scripts/spawn.sh stripe-webhooks-mango dev ~/project
+bash scripts/spawn.sh stripe-webhooks-kiwi dev ~/project
 ```
-Required args: session name, role, workdir
-Available roles: `ceo`, `architect`, `dev`
+Required args: session name, role, workdir.
+Available roles: `ceo`, `architect`, `manager`, `dev`
+
+The spawned session's manager is your `$CLAUDE_SESSION_NAME`
 
 ## Naming
 
