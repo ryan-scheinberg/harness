@@ -46,6 +46,8 @@ Multiple spawned sessions form a strict one-layer-down chain: **user → CEO →
 
 Role skills live under `skills/roles-skillset/role-<name>/` and are applied at spawn time via `/role-<name>` (the slash command the spawn script invokes inside the new session)
 
+Direct user contact surfaces: CEO session (standing channel) and architect during `define-project` / `iterate-plan` (short bursts for scoping and the grill). Everything else reaches the user only by bubbling up the chain. Subagents (e.g. `verify`) never contact the user — they return to their parent
+
 ## Inter-session messaging
 
 Two skills wire the hierarchy: `request-manager` (subordinate → manager) and `respond-to-request` (manager → subordinate), both in `skills/harness-skillset/`. Transport is AppleScript `do script "<text>" in window id X` against the target session's Terminal window — Claude Code's TUI queues typed input when the target is mid-turn, so no polling, inbox files, or reply tracking
