@@ -8,5 +8,8 @@ schedules/state/
 # Third-party skills
 skills/external-skillset/
 
+# Private skillsets
+skills/skillscake-skillset/
+
 # Personal
 CLAUDE.md
