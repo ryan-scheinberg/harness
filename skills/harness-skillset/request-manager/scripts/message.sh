@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Queue a message in your manager's Claude session.
+# Queue a message in your manager's tmux session.
 # Usage: message.sh "<text>"
 # Reads $CLAUDE_SESSION_MANAGER for the target. Fails if unset.
 
 set -e
 
-REGISTRY=~/.claude/session-registry.json
+TMUX=/opt/homebrew/bin/tmux
 text=$1
 
 if [[ -z "$text" ]]; then
@@ -20,31 +20,17 @@ fi
 
 manager=$CLAUDE_SESSION_MANAGER
 
-if [[ ! -f "$REGISTRY" ]]; then
-  echo "No session registry at $REGISTRY." >&2
-  exit 1
-fi
-
-window_id=$(jq -r --arg n "$manager" '.[$n].window_id // empty' "$REGISTRY")
-
-if [[ -z "$window_id" ]]; then
-  echo "Manager session '$manager' not found in registry." >&2
+if ! "$TMUX" has-session -t "$manager" 2>/dev/null; then
+  echo "Manager tmux session '$manager' not found." >&2
   exit 1
 fi
 
 from=${CLAUDE_SESSION_NAME:-unknown}
-msg="[from $from] $text"
+# Flatten newlines so the whole message submits as one Claude turn.
+flat=${text//$'\n'/ }
+msg="[from $from] $flat"
 
-# Escape for AppleScript double-quoted string: backslash then double-quote
-esc=${msg//\\/\\\\}
-esc=${esc//\"/\\\"}
-# AppleScript string literals can't span lines — splice newlines as concatenation
-esc=${esc//$'\n'/'" & return & "'}
+"$TMUX" send-keys -t "$manager" -l "$msg"
+"$TMUX" send-keys -t "$manager" Enter
 
-osascript >/dev/null <<APPLESCRIPT
-tell application "Terminal" to do script "$esc" in window id $window_id
-delay 0.3
-tell application "System Events" to tell process "Terminal" to keystroke return
-APPLESCRIPT
-
-echo "Message queued for manager '$manager' (window $window_id)."
+echo "Message sent to manager '$manager'."

@@ -36,11 +36,10 @@ Required args: session name
 
 ## How it works
 
-Each spawned session:
-- Runs in a new Terminal window (visible and interactive)
-- Can be controlled from terminal directly or from phone
-- Changes sync bidirectionally across terminal and remote
+Each spawned session runs inside a `tmux` session named after the spawn (`smoke-test-lemon`, etc.) and is hosted by a Terminal window that attaches to it. The Terminal window is just a viewer — closing it detaches but does not kill the session. Re-attach any time with `tmux attach -t <name>`, including from a different terminal app like Warp
 
-Sessions are registered in `~/.claude/session-registry.json` — managed automatically, no manual editing needed
+Inter-session messaging (`request-manager`, `respond-to-request`) targets the tmux session by name via `tmux send-keys`, so delivery and submit are focus-independent — no AppleScript keystroke roulette
+
+Sessions are registered in `~/.claude/session-registry.json` for manager-chain metadata. `list.sh` self-prunes entries whose tmux session has died
 
 **Note**: Multiple dispatcher agents may spawn sessions concurrently. `list.sh` shows all registered sessions regardless of which dispatcher created them. Only clean up extra sessions if the user requests it

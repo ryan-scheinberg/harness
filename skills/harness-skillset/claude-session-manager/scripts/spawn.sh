@@ -1,26 +1,27 @@
 #!/usr/bin/env bash
-# Spawn a named Claude --remote-control session in a new Terminal window
+# Spawn a named Claude --remote-control session inside a tmux session, hosted in a Terminal window.
 # Usage: spawn.sh <name> <role> <workdir> "<initial brief>"
 # Manager is always the spawner ($CLAUDE_SESSION_NAME); unset when spawned from the user's terminal.
-# Initial brief is queued as the first message after the role loads — required so a spawn never sits idle.
+# Initial brief folds into the slash-command launch — one turn, no follow-up paste.
 # Model is hardcoded — update MODEL below when a new frontier model ships.
 
 set -e
 
 MODEL="claude-opus-4-7[1m]"
 REGISTRY=~/.claude/session-registry.json
+TMUX=/opt/homebrew/bin/tmux
 
 _reg_init() {
   [[ -f "$REGISTRY" ]] || echo '{}' > "$REGISTRY"
 }
 
 _reg_write() {
-  local name=$1 window_id=$2 pid=$3 workdir=$4 model=$5 manager=$6
+  local name=$1 window_id=$2 workdir=$3 model=$4 manager=$5
   _reg_init
   local tmp=$(mktemp)
-  jq --arg n "$name" --argjson w "$window_id" --argjson p "$pid" \
+  jq --arg n "$name" --argjson w "$window_id" \
      --arg d "$workdir" --arg m "$model" --arg mgr "$manager" --arg t "$(date -u +%FT%TZ)" \
-     '.[$n] = {window_id: $w, pid: $p, workdir: $d, model: $m, manager: $mgr, started: $t}' \
+     '.[$n] = {window_id: $w, workdir: $d, model: $m, manager: $mgr, started: $t}' \
      "$REGISTRY" > "$tmp" && mv "$tmp" "$REGISTRY"
 }
 
@@ -34,25 +35,28 @@ main() {
     return 1
   fi
 
-  # Export session identity + manager so request-manager / respond-to-request can target.
+  if "$TMUX" has-session -t "$name" 2>/dev/null; then
+    echo "Error: tmux session '$name' already exists" >&2
+    return 1
+  fi
+
   # Role + brief go together as one slash-command invocation — one turn, no flaky post-spawn paste.
-  # Positional prompt must come before flags (claude CLI behavior).
-  # Flatten newlines (AppleScript string literals can't span lines) and escape single quotes
+  # Flatten newlines (so the launch line stays a single shell command) and escape single quotes
   # in $initial using the bash '\'' close/escape/reopen idiom.
   local from=${CLAUDE_SESSION_NAME:-user}
   local oneline=${initial//$'\n'/ }
   local prompt_arg="/role-$role [from $from] ${oneline//"'"/"'\\''"}"
-  local cmd="export CLAUDE_SESSION_NAME='$name' CLAUDE_SESSION_MANAGER='$manager'; cd '$workdir' && claude '$prompt_arg' --remote-control -n '$name' --model '$MODEL'"
 
-  # Capture existing PIDs before spawn
-  local existing_pids
-  existing_pids=$(pgrep -f -- "--remote-control" 2>/dev/null || true)
+  # Create the tmux session detached, running claude with the role+brief as initial prompt.
+  # Session identity + manager exported so request-manager / respond-to-request can route.
+  local launch="export CLAUDE_SESSION_NAME='$name' CLAUDE_SESSION_MANAGER='$manager'; cd '$workdir' && claude '$prompt_arg' --remote-control -n '$name' --model '$MODEL'"
+  "$TMUX" new-session -d -s "$name" "$launch"
 
-  # Escape for AppleScript double-quoted string literal: \ and " are the only specials
-  local as_cmd=${cmd//\\/\\\\}
+  # Open a Terminal window that attaches to the tmux session as a viewer.
+  # Closing the window detaches; the tmux session keeps running.
+  local attach_cmd="$TMUX attach -t $name"
+  local as_cmd=${attach_cmd//\\/\\\\}
   as_cmd=${as_cmd//\"/\\\"}
-
-  # Spawn in new Terminal window via AppleScript. Pin "Basic" profile for readability.
   local window_id
   window_id=$(osascript -e "
     tell application \"Terminal\"
@@ -63,31 +67,12 @@ main() {
     end tell" | grep -oE '[0-9]+$')
 
   if [[ -z "$window_id" ]]; then
-    echo "Error: failed to spawn Terminal window" >&2
-    return 1
+    echo "Warning: failed to open viewer window — tmux session is still running, attach with: tmux attach -t $name" >&2
+    window_id=0
   fi
 
-  sleep 5  # wait for session to initialize
-
-  # Find the newly spawned process (not in existing list)
-  local all_pids
-  all_pids=$(pgrep -f -- "--remote-control" 2>/dev/null || true)
-
-  local pid
-  while IFS= read -r p; do
-    if ! grep -q "^$p$" <<< "$existing_pids"; then
-      pid=$p
-      break
-    fi
-  done < <(echo "$all_pids" | sort -rn)
-
-  if [[ -z "$pid" ]]; then
-    echo "Error: session spawned but could not find process" >&2
-    return 1
-  fi
-
-  _reg_write "$name" "$window_id" "$pid" "$workdir" "$MODEL" "$manager"
-  echo "Spawned '$name' — window=$window_id pid=$pid model=$MODEL role=$role manager=${manager:-none}"
+  _reg_write "$name" "$window_id" "$workdir" "$MODEL" "$manager"
+  echo "Spawned '$name' — tmux=$name window=$window_id model=$MODEL role=$role manager=${manager:-none}"
 }
 
 main "$@"
