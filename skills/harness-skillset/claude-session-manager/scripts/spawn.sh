@@ -49,8 +49,10 @@ main() {
 
   # Create the tmux session detached, running claude with the role+brief as initial prompt.
   # Session identity + manager exported so request-manager / respond-to-request can route.
+  # env -u TMUX so the spawn works when the caller is itself inside a tmux session
+  # (CEO spawning manager, manager spawning architect/dev) — tmux refuses to nest by default.
   local launch="export CLAUDE_SESSION_NAME='$name' CLAUDE_SESSION_MANAGER='$manager'; cd '$workdir' && claude '$prompt_arg' --remote-control -n '$name' --model '$MODEL'"
-  "$TMUX" new-session -d -s "$name" "$launch"
+  env -u TMUX "$TMUX" new-session -d -s "$name" "$launch"
 
   # Open a Terminal window that attaches to the tmux session as a viewer.
   # Closing the window detaches; the tmux session keeps running.
