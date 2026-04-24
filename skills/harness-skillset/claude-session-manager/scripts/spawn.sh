@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Spawn a named Claude --remote-control session in a new Terminal window
-# Usage: spawn.sh <name> <role> <workdir>
+# Usage: spawn.sh <name> <role> <workdir> "<initial brief>"
 # Manager is always the spawner ($CLAUDE_SESSION_NAME); unset when spawned from the user's terminal.
+# Initial brief is queued as the first message after the role loads — required so a spawn never sits idle.
 # Model is hardcoded — update MODEL below when a new frontier model ships.
 
 set -e
@@ -24,12 +25,12 @@ _reg_write() {
 }
 
 main() {
-  local name=$1 role=$2 workdir=$3
+  local name=$1 role=$2 workdir=$3 initial=$4
   local manager=$CLAUDE_SESSION_NAME
 
-  if [[ -z "$name" || -z "$role" || -z "$workdir" ]]; then
-    echo "Usage: spawn.sh <name> <role> <workdir>"
-    echo "Example: spawn.sh dev-kiwi dev ~/Documents/skillscake"
+  if [[ -z "$name" || -z "$role" || -z "$workdir" || -z "$initial" ]]; then
+    echo "Usage: spawn.sh <name> <role> <workdir> \"<initial brief>\""
+    echo "Example: spawn.sh dev-kiwi dev ~/Documents/skillscake \"build the MVP slice\""
     return 1
   fi
 
@@ -41,12 +42,12 @@ main() {
   local existing_pids
   existing_pids=$(pgrep -f -- "--remote-control" 2>/dev/null || true)
 
-  # Spawn in new Terminal window via AppleScript
+  # Spawn in new Terminal window via AppleScript. Pin "Basic" profile for readability.
   local window_id
   window_id=$(osascript -e "
     tell application \"Terminal\"
       activate
-      do script \"$cmd\"
+      do script \"$cmd\" with profile \"Basic\"
     end tell" | grep -oE '[0-9]+$')
 
   if [[ -z "$window_id" ]]; then
@@ -75,6 +76,19 @@ main() {
 
   _reg_write "$name" "$window_id" "$pid" "$workdir" "$MODEL" "$manager"
   echo "Spawned '$name' — window=$window_id pid=$pid model=$MODEL role=$role manager=${manager:-none}"
+
+  # Queue the initial brief once the role command has had time to load
+  sleep 3
+  local from=${CLAUDE_SESSION_NAME:-user}
+  local msg="[from $from] $initial"
+  local esc=${msg//\\/\\\\}
+  esc=${esc//\"/\\\"}
+  osascript >/dev/null <<APPLESCRIPT
+tell application "Terminal" to do script "$esc" in window id $window_id
+delay 0.3
+tell application "System Events" to tell process "Terminal" to keystroke return
+APPLESCRIPT
+  echo "Initial brief queued for '$name'."
 }
 
 main "$@"

@@ -10,12 +10,12 @@ Spawn independent `claude --remote-control` sessions in Terminal windows
 Spawn a session:
 
 ```bash
-bash scripts/spawn.sh stripe-webhooks-kiwi dev ~/project
+bash scripts/spawn.sh stripe-webhooks-kiwi dev ~/project "build the MVP slice from SLICES.md"
 ```
-Required args: session name, role, workdir.
+Required args: session name, role, workdir, initial brief. The brief is queued and submitted right after the role loads so the spawned session starts working immediately — never spawn without one
 Available roles: `ceo`, `architect`, `manager`, `dev`
 
-The spawned session's manager is your `$CLAUDE_SESSION_NAME`
+The spawned session's manager is your `$CLAUDE_SESSION_NAME`. New windows open in Terminal's "Basic" profile for readability
 
 ## Naming
 
