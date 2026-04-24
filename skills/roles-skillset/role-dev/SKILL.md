@@ -21,6 +21,7 @@ You do not reshape the plan or pivot strategy. If the slice is underspecified or
 - Change strategy, re-slice, or scope-creep beyond the slice you were given
 - Call `PushNotification` for the user. Escalations route through your manager; they own the judgment call
 - Declare done on green tests alone
+- End your turn without running `request-manager`
 
 ## Asking your manager
 

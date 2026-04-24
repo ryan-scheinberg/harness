@@ -1,110 +1,34 @@
 ---
 name: complete-slice
-description: Implement a vertical slice from SLICES.md end-to-end using TDD. Use when user wants to code a slice of a project or mentions "complete slice".
+description: Implement a vertical slice from SLICES.md end-to-end using TDD. Use when user wants to code a slice of a project or mentions "complete slice"
 ---
 
-# Complete Slice
-
-Take a slice from `SLICES.md` and implement it. Each slice is a vertical, TDD-ready unit with a clear "done when" checklist. This skill is for technical implementation — software engineering and SRE work.
+Take one slice from `SLICES.md` and ship it. Often for dev work, but might be a different task that you should still complete to the standards of the company
 
 ## Process
 
-### 1. Read the slice
+1. **Read the slice and the brief.** Find the target slice. Internalize what it delivers. Read `PROJECT_BRIEF.md` for architectural context
 
-Read `SLICES.md` and find the target slice (the user will tell you which one, or you pick the next unfinished slice in order). Understand:
+2. **Orient in the codebase.** Module boundaries, test patterns, naming, DI style, config approach, what prior slices built. Your code should feel native — same seams, same style. Greenfield: scaffolding + test runner + lint + CI belong inside slice 1, not as separate phases
 
-- **What this delivers** — the demoable outcome
-- **Acceptance criteria** — these define what "done" looks like
-- **Implementation notes** — constraints, patterns, dependencies
-- **Done when** — your exit criteria
+3. **Plan the TDD sequence.** Map acceptance criteria to red-green-refactor cycles. Start with the criterion that proves the core approach. Decide what's a real collaborator and what's a system boundary to mock. Keep the plan light. Use judgement for when to use TDD or take a different approach
 
-If a `PROJECT_BRIEF.md` exists, read it for broader architectural context — tech stack decisions, integration points, deployment targets.
+4. **Build one test at a time.** Red → green → refactor. One failing test, minimum code to pass, clean up while green, next. Public interfaces only; mock system boundaries only; tests survive internal refactors. Writing all tests first produces tests that describe imagined behavior, not actual. See [tdd-reference.md](tdd-reference.md) for the full methodology
 
-### 2. Understand the codebase
+5. **Bake SRE in as you go.** Structured logs at decision points and error paths; metrics on the behaviors this slice introduces; health checks on new endpoints; errors that fail explicitly at boundaries with context; config externalized. Operational readiness isn't a final step — if it's not present when tests go green, it won't be added
 
-**Existing codebase:** explore it before writing anything. Understand module boundaries, existing test patterns, naming conventions, dependency injection style, config approach. Your implementation should feel like it belongs.
+6. **Verify.** All acceptance criteria met and covered by passing tests. Observable outcomes demonstrably work — run it, hit the endpoint, read the logs. Full suite green, not just new tests. No unrelated changes mixed in
 
-**Greenfield:** this slice likely includes project scaffolding. Set up the repo structure, test runner, linting, and CI alongside the MVP implementation — they're one slice, not separate phases.
+7. **Consider future agents** by running `updating-ai-knowledge`, often for `AGENTS.md`
 
-Check what prior slices built. Your slice depends on their interfaces — make sure you understand them and integrate with them, don't duplicate or contradict them.
+8. **Close the slice.** Check the boxes in `SLICES.md`. Follow-up work, discovered edge cases, or risks land in the relevant future slice, or in a `## Notes` section at the bottom of `SLICES.md`
 
-### 3. Plan the approach
+9. **Report** with `request-manager`
 
-Map the slice's acceptance criteria to an implementation sequence. Each criterion may take one or more TDD cycles to satisfy.
+## Scope
 
-Decide:
+Feature work, infrastructure-as-code, migrations, instrumentation, perf, bug fixes, deploy automation. Language, framework, and cloud agnostic
 
-- Which criterion to tackle first (start with the one that proves the core approach for this slice)
-- What existing code you'll touch vs create
-- Where system boundaries are (what to mock vs use real implementations)
+Not for: research spikes with no code deliverable, pure documentation, project planning (use `plan-to-slices`)
 
-Keep the plan lightweight. The TDD cycles will surface details you can't predict.
-
-### 4. Build with TDD
-
-Follow red-green-refactor for each test you create for small vertical parts of the slice. See [tdd-reference.md](tdd-reference.md) for the full methodology.
-
-The loop:
-
-1. **Red** — write *one* failing test
-2. **Green** — write minimal code to make it pass
-3. **Refactor** — clean up while green. Extract duplication, simplify interfaces, deepen modules.
-4. Move to the next test.
-
-Rules:
-
-- One test at a time. Don't write all tests first.
-- Tests verify behavior through public interfaces, not implementation details.
-- Tests should survive internal refactors.
-- Only mock at system boundaries (external APIs, databases, time, file system).
-- The slice's acceptance criteria guide what to test — you'll discover additional tests during red-green-refactor. Write them as they come up.
-- Keep the code readable and clean.
-
-### 5. Handle SRE concerns inline
-
-Don't bolt observability or operability on at the end. As you implement:
-
-- **Structured logging** — log at decision points and error paths, not every function entry/exit. Include correlation IDs where relevant.
-- **Metrics** — instrument the behaviors the slice introduces. Counters for operations, histograms for latencies, gauges for resource usage.
-- **Health checks** — if the slice introduces a service or endpoint, add a health check.
-- **Error handling** — fail explicitly with actionable errors. Catch at boundaries, propagate with context.
-- **Config** — externalize environment-specific values. No hardcoded URLs, credentials, or magic numbers.
-
-If the slice's "done when" checklist mentions any of these, treat them as acceptance criteria. If it doesn't but the implementation calls for them, add them anyway — operational readiness isn't optional.
-
-### 6. Verify against "done when"
-
-When all tests pass, walk the slice's "done when" checklist:
-
-- [ ] All acceptance criteria met and covered by passing tests
-- [ ] Observable outcomes work as described (can demo X, endpoint returns Y, logs show Z)
-- [ ] Code follows existing codebase conventions
-- [ ] No unrelated changes mixed in
-- [ ] Integration with prior slices is intact (run the full test suite, not just your new tests)
-
-### 7. Mark the slice complete
-
-Update `SLICES.md` — mark the slice's "done when" checkboxes. If you discovered follow-up work, edge cases, or risks during implementation, add a note to the relevant future slice or to the bottom of `SLICES.md` under a `## Notes` section.
-
-## What this skill handles
-
-- Feature implementation (APIs, services, data pipelines, UI components)
-- Infrastructure as code (Terraform, Pulumi, CloudFormation, CDK)
-- CI/CD pipeline configuration
-- Database migrations and schema changes
-- Service instrumentation and observability
-- Performance optimization
-- Bug fixes and hardening
-- Deployment automation and rollout config
-
-Language, framework, and cloud provider agnostic.
-
-## What this skill does NOT handle
-
-- Research spikes with no code deliverable — use a different approach
-- Pure documentation or content creation
-- Project planning or slice decomposition — use `plan-to-slices` for that
-
-## Additional Resources
-
-- For TDD methodology, testing philosophy, mocking guidelines, and refactoring patterns, see [tdd-reference.md](tdd-reference.md)
+Skills you lean on: `verify` subagent before declaring done, `cursor-delegate` for a second opinion or implementation partner

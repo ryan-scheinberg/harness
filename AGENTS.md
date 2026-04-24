@@ -40,13 +40,13 @@ Non-obvious bits:
 Multiple spawned sessions form a strict one-layer-down chain: **user → CEO → manager → architect/dev**. `claude-session-manager/scripts/spawn.sh` always derives the spawned session's manager from the spawner's `$CLAUDE_SESSION_NAME` — whoever runs spawn.sh becomes the new session's manager, no override. Spawned from the user's terminal (no env var set), the manager field is empty, which is correct for the CEO
 
 - **CEO** spawns managers only. Routes work and holds the portfolio view; does not write code or produce briefs
-- **Manager** owns a workstream end-to-end. Spawns an architect when the work needs real slicing, then up to 3 devs. Fields their questions, verifies output, ships
-- **Architect** plans and exits. Hands back `PROJECT_BRIEF.md` + `SLICES.md` via `request-manager` and departs. Does not supervise devs — that decouples planning from execution so devs have exactly one upward channel
+- **Manager** owns a workstream end-to-end. Spawns an architect when the work needs real slicing, reviews the draft brief before it reaches the user, then spawns one dev on the MVP slice and checks in with the CEO before later waves (up to 2 concurrent devs after). Fields dev questions, verifies final output, ships
+- **Architect** plans and exits. Drafts `PROJECT_BRIEF.md` solo, pings manager for review before grilling the user with `iterate-plan`, then produces `SLICES.md` and hands back. Does not supervise devs — that decouples planning from execution so devs have exactly one upward channel
 - **Dev** implements a single slice, verifies, reports back via `request-manager`
 
 Role skills live under `skills/roles-skillset/role-<name>/` and are applied at spawn time via `/role-<name>` (the slash command the spawn script invokes inside the new session)
 
-Direct user contact surfaces: CEO session (standing channel) and architect during `define-project` / `iterate-plan` (short bursts for scoping and the grill). Everything else reaches the user only by bubbling up the chain. Subagents (e.g. `verify`) never contact the user — they return to their parent
+Direct user contact surfaces: CEO session (standing channel) and architect during `iterate-plan` (the grill, after manager has cleared the draft brief). Everything else reaches the user only by bubbling up the chain. Subagents (e.g. `verify`) never contact the user — they return to their parent
 
 ## Inter-session messaging
 

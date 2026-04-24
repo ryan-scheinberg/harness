@@ -1,93 +1,55 @@
 ---
 name: define-project
-description: Take a brief idea and produce a complete PROJECT_BRIEF.md as if the user wrote it on their best day. Covers features, fixes, infra, and full products alike. Use when user wants to define a project, scope a feature, plan a complex fix, or mentions "project brief" or "new project".
+description: Take a brief idea and produce a complete PROJECT_BRIEF.md as if the user wrote it on their best day. Covers features, fixes, infra, and full products alike. Use when user wants to define a project, scope a feature, plan a complex fix, or mentions "project brief" or "new project"
 ---
 
-# Define Project
-
-Produce a complete `PROJECT_BRIEF.md`.
-
-If there's an existing codebase, explore it to fill in context the user didn't provide.
-
-## Who's Building This
-
-Ryan Scheinberg. Infrastructure engineer and entrepreneur. Thinks in pipelines, IaC, TDD, vertical slices, o11y. Building businesses top-to-bottom with agents — AI is infrastructure, not a novelty. Solo + agents is the team. Jira for tracking. Opinionated about code standards, testing, and shipping small increments. Write the brief the way he would: terse, opinionated, no fluff, decisions made not deferred.
-
-## What This Skill Handles
-
-Anything that needs definition before building:
-
-- A new SaaS product
-- A complex feature in an existing codebase
-- A refactor with migration concerns
-- An infra change (new pipeline, new environment, IaC module)
-- A bug fix complex enough to need a plan
-- A spike or research task
-
-The template adapts. A bug fix doesn't need a business model section. A SaaS needs all of it. Use judgment — include what's relevant, skip what isn't.
+Produce a `PROJECT_BRIEF.md` proficient agents can pick up and build from without clarifying questions. Terse, opinionated, decisions made not deferred. The user's persona and preferences already live in `CLAUDE.md` — don't restate them
 
 ## Process
 
-1. Read the user's input carefully. It might be vague — that's fine. Infer what you can.
-2. If there's an existing codebase, explore it. Understand the current state, existing patterns, tech stack, test setup, CI config. Don't ask — look.
-3. Make decisions. Pick the stack, scope the MVP, identify the vertical slices. Be opinionated. If a decision is genuinely uncertain, put it in Open Questions — but default to deciding.
-4. Write `PROJECT_BRIEF.md` using the template below. Adapt the template to fit the project type. Write it in Ryan's voice — terse, direct, structured, no filler.
+1. **Read the user's input.** Infer what you can as an architect. `iterate-plan` closes the rest after the first draft
+2. **Explore the codebase if one exists** starting with `AGENTS.md` files. Tech stack, test setup, CI, module boundaries, naming conventions. Don't ask what code can answer
+3. **Decide.** Pick the stack and scope the MVP — the thinnest end-to-end vertical path that proves the approach. Genuine uncertainty goes in Risks & Open Questions. Default to deciding. Hedged briefs ship ambiguity forward into dev turns. Don't name downstream slices here — that's `plan-to-slices`' job, and pre-slicing the brief locks in a shape before the MVP has taught you anything
+4. **Write the brief** using the template. Adapt freely — drop sections that don't apply, add sections when the project needs them. A bug fix doesn't need a business model; a SaaS needs all of it
 
 ## Template
-
-Use this structure. Drop sections that don't apply. Add sections if the project needs them. Modify to your heart's content. Consider deeply every line of the plan, but also commit.
 
 <brief-template>
 
 # [Project Name]
 
 ## Context
-
-What this is, why it exists, what problem it solves. For features/fixes: what's broken or missing and why it matters. For products: the business case in plain language. No throat-clearing — get to the point.
+What this is, why it exists, the problem it solves. No throat-clearing
 
 ## Audience
-
-Who uses this or who benefits. Be specific. For internal/infra work, the audience might be "the deployment pipeline" or "future contributors to this repo."
+Who uses or benefits. For internal or infra work this may be "the deployment pipeline" or "future contributors to this repo"
 
 ## Scope
 
 ### The MVP Slice
-
-The thinnest end-to-end path that proves this works. One sentence: "A user/system can [do X] and [see/get Y]."
+One sentence: "A user/system can [do X] and [see/get Y]"
 
 ### In Scope
-
-- What's included in this effort
+- ...
 
 ### Out of Scope
-
-- What's explicitly excluded and why
+- What's excluded and why
 
 ## Technical Approach
-
-How this gets built. Stack choices with rationale. Architecture decisions. For existing codebases: what changes, what doesn't, what's the blast radius.
-
-Include data, auth, and infra decisions where relevant. Skip what doesn't apply.
+Stack, architecture, data, auth, infra with rationale. For existing codebases: what changes, what doesn't
 
 ## Testing & Observability
-
-What gets tested and instrumented. Structured logging, key metrics, health checks. Even for small features — what would tell you this is working or broken in production?
+What gets tested and instrumented. Structured logging, key metrics, health checks. What tells you this is working or broken in prod
 
 ## Deployment & Rollout
-
-How this gets to production. Environments, rollout strategy, feature flags, rollback plan. What does a successful deploy look like? What would trigger a rollback? Skip for non-deployable work.
+Environments, rollout strategy, flags, rollback. Skip for non-deployable work
 
 ## Risks & Open Questions
-
-What's uncertain. Each item should note what would close it. Be opinionated. Consider what risks apply to different vertical slices of the project. Consider the entire decision tree, but make your choices based on everything you've learned here.
+What's uncertain. Each item notes what would close it
 
 </brief-template>
 
-## Quality Bar
+## Quality bar
 
-- Reads like Ryan wrote it, not like a template was filled in
-- Proficient agents could pick it up and start building without asking clarifying questions
-- Decisions are made, not hedged — except explicit open questions
-- Scope is a vertical slice, not a feature list
-- SRE best practices are present regardless of project size
-- No section is boilerplate — if you can't write something specific, drop the section
+- Every section is specific. If you can only fill it with boilerplate, drop it
+- Decisions are committed or flagged, never hedged
