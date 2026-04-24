@@ -31,6 +31,10 @@ msg="[from $from] $text"
 esc=${msg//\\/\\\\}
 esc=${esc//\"/\\\"}
 
-osascript -e "tell application \"Terminal\" to do script \"$esc\" in window id $window_id" >/dev/null
+osascript >/dev/null <<APPLESCRIPT
+tell application "Terminal" to do script "$esc" in window id $window_id
+delay 0.3
+tell application "System Events" to tell process "Terminal" to keystroke return
+APPLESCRIPT
 
 echo "Reply queued for '$target' (window $window_id)."
