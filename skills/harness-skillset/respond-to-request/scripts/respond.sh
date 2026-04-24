@@ -30,6 +30,8 @@ msg="[from $from] $text"
 
 esc=${msg//\\/\\\\}
 esc=${esc//\"/\\\"}
+# AppleScript string literals can't span lines — splice newlines as concatenation
+esc=${esc//$'\n'/'" & return & "'}
 
 osascript >/dev/null <<APPLESCRIPT
 tell application "Terminal" to do script "$esc" in window id $window_id

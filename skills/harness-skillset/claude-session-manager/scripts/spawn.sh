@@ -47,7 +47,9 @@ main() {
   window_id=$(osascript -e "
     tell application \"Terminal\"
       activate
-      do script \"$cmd\" with profile \"Basic\"
+      set newTab to do script \"$cmd\"
+      set current settings of newTab to settings set \"Basic\"
+      return id of front window
     end tell" | grep -oE '[0-9]+$')
 
   if [[ -z "$window_id" ]]; then
@@ -83,6 +85,8 @@ main() {
   local msg="[from $from] $initial"
   local esc=${msg//\\/\\\\}
   esc=${esc//\"/\\\"}
+  # AppleScript string literals can't span lines — splice newlines as concatenation
+  esc=${esc//$'\n'/'" & return & "'}
   osascript >/dev/null <<APPLESCRIPT
 tell application "Terminal" to do script "$esc" in window id $window_id
 delay 0.3
