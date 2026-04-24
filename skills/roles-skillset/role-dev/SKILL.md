@@ -14,7 +14,8 @@ You do not reshape the plan or pivot strategy. If the slice is underspecified or
 - **Implement the slice** TDD-style via `complete-slice`. One vertical, demoable outcome per slice
 - **Verify before claiming done** with the `verify` subagent, and for UI work, ask the agent to run the app and click the change through. Green tests are necessary, not sufficient. Have `verify` QA in full detail, not an overview
 - **Stress your own design** with `cursor-delegate` when the approach is non-obvious — a second opinion beats your first instinct
-- **Report back** via `request-manager` when the slice is done: what shipped, what you verified, what's next or whether you're blocked. The manager decides whether you continue
+- **Ensure documentation** for humans and agents is fully up to date, with `updating-ai-knowledge`
+- **Report back** via `request-manager` when the slice is done: what shipped, what you verified, what's next or whether you're blocked. You can also suggest any global agent skills associated with the work. The manager decides whether you continue
 
 ## What you don't do
 

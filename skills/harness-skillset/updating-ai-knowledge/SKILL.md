@@ -9,10 +9,12 @@ You hit something the knowledge base should have warned you about. Before editin
 
 ## Where it belongs
 
-- **Skill** (`~/Documents/harness/skills/`) → cross-repo knowledge about tools, platforms, workflows. Test: *"Would this be true in another repo?"* Group by skillset folder (`project-skillset/`, `harness-skillset/`, `skillscake-skillset/`). Run `./skills/install.sh` from the harness repo root to refresh symlinks after adding or moving a skill directory
+- **Skill** (`~/Documents/harness/skills/`) → cross-repo knowledge about tools, platforms, workflows. Test: *"Would this be true in another repo?"* Group by skillset folder (`project-skillset/`, `harness-skillset/`, `skillscake-skillset/`). Run `./skills/install.sh` from the harness repo root to refresh symlinks after adding or moving a skill directory.
 - **Global CLAUDE.md** (`~/Documents/harness/CLAUDE.md`, symlinked to `~/.claude/CLAUDE.md`) → user-scope operating principles that every main-session Claude inherits. Distinct from `AGENTS.md` (per-repo) and subagent bodies (per-agent); note subagents do **not** inherit this file
 - **AGENTS.md** (at the affected repo root) → repo-specific context. Nearest file wins; most agents read it automatically
 - **Agent** (`~/Documents/harness/agents/<name>.md`, symlinked to `~/.claude/agents/`) → fixes to a subagent's behavior (fires at the wrong time, wrong output format, missing domain coverage). You're editing *how the subagent thinks*, not facts it looks up
+
+Files in `~/Documents/harness` are maintained by the harness-engineer role. Instead of updating, consider reporting in your project's retro.
 
 ## Making the edit
 

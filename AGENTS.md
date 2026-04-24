@@ -37,30 +37,35 @@ Non-obvious bits:
 
 ## Session hierarchy
 
-Multiple spawned sessions form a strict one-layer-down chain: **user → CEO → manager → architect/dev**. `claude-session-manager/scripts/spawn.sh` always derives the spawned session's manager from the spawner's `$CLAUDE_SESSION_NAME` — whoever runs spawn.sh becomes the new session's manager, no override. Spawned from the user's terminal (no env var set), the manager field is empty, which is correct for the CEO
+The **work lane** is a strict one-layer-down chain: **user → CEO → manager → architect/dev**. `claude-session-manager/scripts/spawn.sh` always derives the spawned session's manager from the spawner's `$CLAUDE_SESSION_NAME` — whoever runs spawn.sh becomes the new session's manager, no override. Spawned from the user's terminal (no env var set), the manager field is empty, which is correct for top-of-chain sessions (CEO, harness-engineer)
 
-- **CEO** spawns managers only. Routes work and holds the portfolio view; does not write code or produce briefs
-- **Manager** owns a workstream end-to-end. Spawns an architect when the work needs real slicing, reviews the draft brief before it reaches the user, then spawns one dev on the MVP slice and checks in with the CEO before later waves (up to 2 concurrent devs after). Fields dev questions, verifies final output, ships
+The **harness-engineer** runs on a separate lane, peer to the CEO. User-spawned only, persistent across a work cycle, reads accumulating retros and evolves the harness itself. It does not run product work, does not direct the CEO, and no session spawns it or reports to it
+
+- **CEO** spawns managers only. Routes work and holds the portfolio view; does not write code or produce briefs. Uses the `workstream-digest` subagent for the handoff brief at workstream close — does not read shipped implementation directly, context stays on leadership
+- **Manager** owns a workstream end-to-end. Spawns an architect when the work needs real slicing, reviews the draft brief before it reaches the user, then spawns one dev on the MVP slice and checks in with the CEO before later waves (up to 2 concurrent devs after). Fields dev questions, verifies final output, writes a retro at `~/Documents/harness/retros/YYYY-MM-DD-<slug>.md` before reporting complete, ships
 - **Architect** plans and exits. Drafts `PROJECT_BRIEF.md` solo, pings manager for review before grilling the user with `iterate-plan`, then produces `SLICES.md` and hands back. Does not supervise devs — that decouples planning from execution so devs have exactly one upward channel
 - **Dev** implements a single slice, verifies, reports back via `request-manager`
+- **Harness-engineer** evolves the harness from retros. Peer to CEO, user-spawned only, slow by design. Never touches product work
 
-Role skills live under `skills/roles-skillset/role-<name>/` and are applied at spawn time via `/role-<name>` (the slash command the spawn script invokes inside the new session)
+Role skills live under `skills/roles-skillset/role-<name>/` and are applied at spawn time via `/role-<name>` (the slash command the spawn script invokes inside the new session). Which roles a session can spawn is declared in its own role skill body, not in `claude-session-manager` — `spawn.sh` passes the role name through unchanged, so hierarchy is enforced by role docs, not the script
 
-Direct user contact surfaces: CEO session (standing channel) and architect during `iterate-plan` (the grill, after manager has cleared the draft brief). Everything else reaches the user only by bubbling up the chain. Subagents (e.g. `verify`) never contact the user — they return to their parent
+Retros at `~/Documents/harness/retros/` are the evidence base the harness-engineer reads. Managers write them at workstream close; the directory is gitignored (private workstream detail). Don't delete them — they accumulate
+
+Direct user contact surfaces: CEO (standing channel), harness-engineer (user-spawned, standing across a work cycle), and architect during `iterate-plan` (the grill, after manager has cleared the draft brief). Everything else reaches the user only by bubbling up the chain. Subagents (e.g. `verify`, `workstream-digest`) never contact the user — they return to their parent
 
 ## Inter-session messaging
 
 Two skills wire the hierarchy: `request-manager` (subordinate → manager) and `respond-to-request` (manager → subordinate), both in `skills/harness-skillset/`. Transport is `tmux send-keys -t <session> -l "<text>"` followed by `tmux send-keys -t <session> Enter` — every spawned session lives inside a tmux session of the same name (the Terminal window is just a viewer that attaches to it). Delivery and submit are focus-independent, so multiple sessions can message each other concurrently without keystroke routing problems. Claude Code's TUI queues typed input when the target is mid-turn, so no polling, inbox files, or reply tracking
 
 - Session identity flows via env: spawn.sh exports `CLAUDE_SESSION_NAME` and `CLAUDE_SESSION_MANAGER` before `claude` launches. The registry at `~/.claude/session-registry.json` gained a `manager` field. Both message scripts read registry + env to route
-- `PushNotification` is the fallback for sessions with no manager configured — normally the CEO, but also any session the user spawns directly from their terminal (a manager or architect launched without going through a CEO first). Everyone else escalates through their own manager, even for launch/spend/compliance. Single upward channel per session, and only the top of the chain ever pings the user
+- `PushNotification` is the fallback for sessions with no manager configured — CEO and harness-engineer by default, plus any session the user spawns directly from their terminal (a manager or architect launched without going through a CEO first). Everyone else escalates through their own manager, even for launch/spend/compliance. Single upward channel per session, and only the top of the chain ever pings the user
 - `request-manager` does not end the agent's turn. Blocking asks (permission, unresolved tradeoff) require the agent to end the turn after sending so the reply lands as next input; non-blocking sends (status, slice-done, hand-off) keep working
 
 ## Editing harness content
 
 When you fix friction and the right place to capture it is a skill, agent, or `AGENTS.md`, follow the **`updating-ai-knowledge`** skill. Especially: do not change a skill's `name:` field (it aligns with symlink names and loaders), and prefer small, evidence-based edits
 
-**Keep `README.md` in sync** with new skills, agents, and major structural changes. The README is the canonical reference for harness layout
+**Keep `README.md` in sync** with major structural changes to the layout — new top-level directories, installers, or install steps. README is the install/layout doc, not a skill or agent index, so routine additions under `skills/` or `agents/` don't need a README entry
 
 ### Voice
 

@@ -12,8 +12,7 @@ Spawn a session:
 ```bash
 bash scripts/spawn.sh stripe-webhooks-kiwi dev ~/project "build the MVP slice from SLICES.md"
 ```
-Required args: session name, role, workdir, initial brief. The brief is queued and submitted right after the role loads so the spawned session starts working immediately — never spawn without one
-Available roles: `ceo`, `architect`, `manager`, `dev`
+Required args: session name, role, workdir, initial brief
 
 The spawned session's manager is your `$CLAUDE_SESSION_NAME`. New windows open in Terminal's "Basic" profile for readability
 
@@ -38,7 +37,7 @@ Required args: session name
 
 Each spawned session runs inside a `tmux` session named after the spawn (`smoke-test-lemon`, etc.) and is hosted by a Terminal window that attaches to it. The Terminal window is just a viewer — closing it detaches but does not kill the session. Re-attach any time with `tmux attach -t <name>`, including from a different terminal app like Warp
 
-`spawn.sh` calls `tmux new-session` with `env -u TMUX` so it works when the caller is itself inside a tmux session — every spawned role (CEO, manager, architect, dev) lives in tmux, so any further spawn happens from inside one. Without unsetting `TMUX`, tmux refuses to nest
+`spawn.sh` calls `tmux new-session` with `env -u TMUX` so it works when the caller is itself inside a tmux session — every spawned role lives in tmux, so any further spawn happens from inside one. Without unsetting `TMUX`, tmux refuses to nest
 
 Inter-session messaging (`request-manager`, `respond-to-request`) targets the tmux session by name via `tmux send-keys`, so delivery and submit are focus-independent — no AppleScript keystroke roulette
 
