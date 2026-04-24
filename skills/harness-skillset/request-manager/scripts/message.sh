@@ -31,6 +31,9 @@ flat=${text//$'\n'/ }
 msg="[from $from] $flat"
 
 "$TMUX_BIN" send-keys -t "$manager" -l "$msg"
+# Wait out Claude TUI's bracketed-paste detection window — rapid send-keys
+# input gets coalesced as a "paste" and an immediate Enter falls inside it.
+sleep 0.5
 "$TMUX_BIN" send-keys -t "$manager" Enter
 
 echo "Message sent to manager '$manager'."
