@@ -56,7 +56,10 @@ main() {
 
   # Open a Terminal window that attaches to the tmux session as a viewer.
   # Closing the window detaches; the tmux session keeps running.
-  local attach_cmd="$TMUX_BIN attach -t $name"
+  # The trailing `; exit` makes the host shell exit when tmux detaches/dies,
+  # so the Terminal window auto-closes (subject to the user's "close on shell
+  # exit" pref) even when shutdown.sh can't reach it via window_id.
+  local attach_cmd="$TMUX_BIN attach -t $name; exit"
   local as_cmd=${attach_cmd//\\/\\\\}
   as_cmd=${as_cmd//\"/\\\"}
   local window_id
