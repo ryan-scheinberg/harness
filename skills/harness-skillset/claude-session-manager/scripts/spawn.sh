@@ -35,19 +35,29 @@ main() {
   fi
 
   # Export session identity + manager so request-manager / respond-to-request can target.
+  # Role + brief go together as one slash-command invocation — one turn, no flaky post-spawn paste.
   # Positional prompt must come before flags (claude CLI behavior).
-  local cmd="export CLAUDE_SESSION_NAME='$name' CLAUDE_SESSION_MANAGER='$manager'; cd '$workdir' && claude /role-$role --remote-control -n '$name' --model '$MODEL'"
+  # Flatten newlines (AppleScript string literals can't span lines) and escape single quotes
+  # in $initial using the bash '\'' close/escape/reopen idiom.
+  local from=${CLAUDE_SESSION_NAME:-user}
+  local oneline=${initial//$'\n'/ }
+  local prompt_arg="/role-$role [from $from] ${oneline//"'"/"'\\''"}"
+  local cmd="export CLAUDE_SESSION_NAME='$name' CLAUDE_SESSION_MANAGER='$manager'; cd '$workdir' && claude '$prompt_arg' --remote-control -n '$name' --model '$MODEL'"
 
   # Capture existing PIDs before spawn
   local existing_pids
   existing_pids=$(pgrep -f -- "--remote-control" 2>/dev/null || true)
+
+  # Escape for AppleScript double-quoted string literal: \ and " are the only specials
+  local as_cmd=${cmd//\\/\\\\}
+  as_cmd=${as_cmd//\"/\\\"}
 
   # Spawn in new Terminal window via AppleScript. Pin "Basic" profile for readability.
   local window_id
   window_id=$(osascript -e "
     tell application \"Terminal\"
       activate
-      set newTab to do script \"$cmd\"
+      set newTab to do script \"$as_cmd\"
       set current settings of newTab to settings set \"Basic\"
       return id of front window
     end tell" | grep -oE '[0-9]+$')
@@ -78,21 +88,6 @@ main() {
 
   _reg_write "$name" "$window_id" "$pid" "$workdir" "$MODEL" "$manager"
   echo "Spawned '$name' — window=$window_id pid=$pid model=$MODEL role=$role manager=${manager:-none}"
-
-  # Queue the initial brief once the role command has had time to load
-  sleep 3
-  local from=${CLAUDE_SESSION_NAME:-user}
-  local msg="[from $from] $initial"
-  local esc=${msg//\\/\\\\}
-  esc=${esc//\"/\\\"}
-  # AppleScript string literals can't span lines — splice newlines as concatenation
-  esc=${esc//$'\n'/'" & return & "'}
-  osascript >/dev/null <<APPLESCRIPT
-tell application "Terminal" to do script "$esc" in window id $window_id
-delay 0.3
-tell application "System Events" to tell process "Terminal" to keystroke return
-APPLESCRIPT
-  echo "Initial brief queued for '$name'."
 }
 
 main "$@"
