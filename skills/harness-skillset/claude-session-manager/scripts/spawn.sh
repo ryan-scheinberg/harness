@@ -9,7 +9,7 @@ set -e
 
 MODEL="claude-opus-4-7[1m]"
 REGISTRY=~/.claude/session-registry.json
-TMUX=/opt/homebrew/bin/tmux
+TMUX_BIN=/opt/homebrew/bin/tmux
 
 _reg_init() {
   [[ -f "$REGISTRY" ]] || echo '{}' > "$REGISTRY"
@@ -35,7 +35,7 @@ main() {
     return 1
   fi
 
-  if "$TMUX" has-session -t "$name" 2>/dev/null; then
+  if "$TMUX_BIN" has-session -t "$name" 2>/dev/null; then
     echo "Error: tmux session '$name' already exists" >&2
     return 1
   fi
@@ -52,11 +52,11 @@ main() {
   # env -u TMUX so the spawn works when the caller is itself inside a tmux session
   # (CEO spawning manager, manager spawning architect/dev) — tmux refuses to nest by default.
   local launch="export CLAUDE_SESSION_NAME='$name' CLAUDE_SESSION_MANAGER='$manager'; cd '$workdir' && claude '$prompt_arg' --remote-control -n '$name' --model '$MODEL'"
-  env -u TMUX "$TMUX" new-session -d -s "$name" "$launch"
+  env -u TMUX "$TMUX_BIN" new-session -d -s "$name" "$launch"
 
   # Open a Terminal window that attaches to the tmux session as a viewer.
   # Closing the window detaches; the tmux session keeps running.
-  local attach_cmd="$TMUX attach -t $name"
+  local attach_cmd="$TMUX_BIN attach -t $name"
   local as_cmd=${attach_cmd//\\/\\\\}
   as_cmd=${as_cmd//\"/\\\"}
   local window_id

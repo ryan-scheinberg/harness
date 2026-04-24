@@ -4,7 +4,7 @@
 set -e
 
 REGISTRY=~/.claude/session-registry.json
-TMUX=/opt/homebrew/bin/tmux
+TMUX_BIN=/opt/homebrew/bin/tmux
 
 main() {
   if [[ ! -f "$REGISTRY" ]]; then
@@ -19,7 +19,7 @@ main() {
   cp "$REGISTRY" "$tmp"
   while IFS= read -r n; do
     [[ -z "$n" ]] && continue
-    if ! "$TMUX" has-session -t "$n" 2>/dev/null; then
+    if ! "$TMUX_BIN" has-session -t "$n" 2>/dev/null; then
       jq --arg n "$n" 'del(.[$n])' "$tmp" > "$tmp.new" && mv "$tmp.new" "$tmp"
     fi
   done <<< "$names"

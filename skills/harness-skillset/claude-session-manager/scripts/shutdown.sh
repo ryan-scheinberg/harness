@@ -4,7 +4,7 @@
 set -e
 
 REGISTRY=~/.claude/session-registry.json
-TMUX=/opt/homebrew/bin/tmux
+TMUX_BIN=/opt/homebrew/bin/tmux
 
 _reg_init() {
   [[ -f "$REGISTRY" ]] || echo '{}' > "$REGISTRY"
@@ -38,17 +38,17 @@ main() {
   echo "Shutting down '$name'..."
 
   # Try a graceful /exit through tmux first; then kill the tmux session if it lingers.
-  if "$TMUX" has-session -t "$name" 2>/dev/null; then
-    "$TMUX" send-keys -t "$name" -l "/exit" 2>/dev/null || true
-    "$TMUX" send-keys -t "$name" Enter 2>/dev/null || true
+  if "$TMUX_BIN" has-session -t "$name" 2>/dev/null; then
+    "$TMUX_BIN" send-keys -t "$name" -l "/exit" 2>/dev/null || true
+    "$TMUX_BIN" send-keys -t "$name" Enter 2>/dev/null || true
     local i=0
-    while "$TMUX" has-session -t "$name" 2>/dev/null && (( i < 25 )); do
+    while "$TMUX_BIN" has-session -t "$name" 2>/dev/null && (( i < 25 )); do
       sleep 0.2
       (( i++ ))
     done
-    if "$TMUX" has-session -t "$name" 2>/dev/null; then
+    if "$TMUX_BIN" has-session -t "$name" 2>/dev/null; then
       echo "Warning: forcing tmux kill-session"
-      "$TMUX" kill-session -t "$name" 2>/dev/null || true
+      "$TMUX_BIN" kill-session -t "$name" 2>/dev/null || true
     fi
   else
     echo "Note: no live tmux session — registry cleanup only"

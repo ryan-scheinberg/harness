@@ -5,7 +5,7 @@
 
 set -e
 
-TMUX=/opt/homebrew/bin/tmux
+TMUX_BIN=/opt/homebrew/bin/tmux
 text=$1
 
 if [[ -z "$text" ]]; then
@@ -20,7 +20,7 @@ fi
 
 manager=$CLAUDE_SESSION_MANAGER
 
-if ! "$TMUX" has-session -t "$manager" 2>/dev/null; then
+if ! "$TMUX_BIN" has-session -t "$manager" 2>/dev/null; then
   echo "Manager tmux session '$manager' not found." >&2
   exit 1
 fi
@@ -30,7 +30,7 @@ from=${CLAUDE_SESSION_NAME:-unknown}
 flat=${text//$'\n'/ }
 msg="[from $from] $flat"
 
-"$TMUX" send-keys -t "$manager" -l "$msg"
-"$TMUX" send-keys -t "$manager" Enter
+"$TMUX_BIN" send-keys -t "$manager" -l "$msg"
+"$TMUX_BIN" send-keys -t "$manager" Enter
 
 echo "Message sent to manager '$manager'."
