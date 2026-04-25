@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 hooks/dist/
 schedules/state/
+schedules/*.cron
 
 # Third-party skills
 skills/external-skillset/

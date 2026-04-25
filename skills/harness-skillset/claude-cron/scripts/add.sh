@@ -2,11 +2,11 @@
 # Schedule a recurring `claude -p` run. Writes a spec to ~/Documents/harness/schedules/
 # and syncs the user's crontab.
 # Usage: add.sh <name> "<cron-schedule>" "<prompt>"
-# Example: add.sh daily-angle "0 9 * * *" "/skillscake-marketing-ideation"
+# Example: add.sh morning-brief "0 9 * * *" "/skillscake-marketing-ideation"
 #
-# The schedule must be daily: `M H * * *`. Catch-up is automatic — if the laptop
-# was asleep at the scheduled moment, the job runs on the next cron tick after
-# wake, and still fires at the intended time the next day (no drift).
+# Any 5-field cron expression is accepted. The installer adds a top-of-hour
+# catch-up tick alongside the user's schedule so a fire missed by laptop sleep
+# still runs after wake; the wrapper dedups via a stamp.
 
 set -e
 
@@ -25,8 +25,8 @@ main() {
     return 1
   fi
 
-  if [[ ! "$schedule" =~ ^[0-9]+[[:space:]]+[0-9]+[[:space:]]+\*[[:space:]]+\*[[:space:]]+\*$ ]]; then
-    echo "Error: schedule must be daily format 'M H * * *' (e.g., '0 9 * * *' for 9am daily)" >&2
+  if [[ ! "$schedule" =~ ^[^[:space:]]+([[:space:]]+[^[:space:]]+){4}$ ]]; then
+    echo "Error: schedule must be a 5-field cron expression (e.g., '0 9 * * *')" >&2
     echo "Got: '$schedule'" >&2
     return 1
   fi
@@ -44,16 +44,20 @@ main() {
   local desc
   desc=$(printf '%s' "$prompt" | tr '\n' ' ' | cut -c1-80)
 
-  mkdir -p "$SCHED_DIR" "$LOG_DIR"
+  mkdir -p "$SCHED_DIR" "$SCHED_DIR/state" "$LOG_DIR"
+
+  # Seed the stamp at install time so the catch-up tick won't retroactively fire
+  # the body for a scheduled time that already passed today.
+  date +%s > "$SCHED_DIR/state/$name.stamp"
 
   {
     printf '# schedule: %s\n' "$schedule"
     printf '# description: %s\n' "$desc"
     printf '\n'
-    printf "%s -p \"\$(cat <<'PROMPT'\n" "$claude_bin"
-    printf '%s\n' "$prompt"
-    printf 'PROMPT\n'
-    printf ')" --model %s >> %s/%s.log 2>&1\n' "$MODEL" "$LOG_DIR" "$name"
+    printf '%s -p ' "$claude_bin"
+    # %q (not a heredoc): round-trips quotes/newlines/$/backticks safely
+    printf '%q' "$prompt"
+    printf ' --model %s >> %s/%s.log 2>&1\n' "$MODEL" "$LOG_DIR" "$name"
   } > "$spec"
 
   "$SCHED_DIR/install.sh"

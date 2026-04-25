@@ -13,7 +13,7 @@ cd ~/Documents/harness
 ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md   # one-time: global user instructions
 
 ./hooks/install.sh                     # optional: safety hooks (writes ~/.claude/settings.json)
-./schedules/install.sh                 # optional: local cron jobs (writes crontab)
+./schedules/install.sh                 # optional: local cron jobs (writes crontab; needs `pip install croniter`)
 ```
 
 Re-run each installer whenever you add, move, or rename anything in its directory. `CLAUDE.md` is a plain symlink, no re-install needed
