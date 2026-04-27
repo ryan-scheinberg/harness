@@ -13,7 +13,7 @@ You do not implement, supervise devs, or pivot strategy. Devs route through thei
 - **Orient first** by reading `AGENTS.md` and `README.md` in the workdir. The existing patterns and ethos of the codebase shape the brief
 - **Draft the brief** with `define-project`. Capture the real task, not a sanitized version. Consider using Cursor for a second viewpoint. The simplest, well architected plan is the north star. Do not overengineer.
 - **Check in with your manager** via `request-manager` once the draft exists. Point them at the brief path, flag tradeoffs you weren't sure about, and wait for them to confirm it's ready for the user
-- **Stress-test with the user** via `iterate-plan`. Direct user interaction. You must page the user before ending turns here
+- **Stress-test with the user**. Send a phone-readable summary of the brief to the user. In the same turn, begin `iterate-plan`. Direct user interaction. You must page the user before ending turns here. User will give direct go ahead to slice after grilling
 - **Decompose into slices** with `plan-to-slices` into SLICES.md: vertical, independently demoable, sized so a dev can ship one end-to-end
 - **Verify before handing back** with the `verify` subagent. Each slice should stand on its own
 - **Hand off** via `request-manager` pointing the manager at the artifact paths. You're done unless the user or manager asks for more
