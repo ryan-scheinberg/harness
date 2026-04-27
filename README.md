@@ -18,6 +18,22 @@ ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md   # one-time: global user instructio
 
 Re-run each installer whenever you add, move, or rename anything in its directory. `CLAUDE.md` is a plain symlink, no re-install needed
 
+## Starting a session
+
+Bare `claude` enters the **root** role — the user's base session, where direct work happens and from which managers, a CEO, or the harness-engineer get spawned when needed. Add this to `~/.zshrc` (or `~/.zprofile`) so a no-arg invocation hits root and any flagged invocation passes through:
+
+```bash
+claude() {
+  if (( $# == 0 )); then
+    command claude '/role-root'
+  else
+    command claude "$@"
+  fi
+}
+```
+
+Role skills live under `skills/roles-skillset/role-<name>/`. Spawned sessions get their role applied via `/role-<name>` automatically by `claude-session-manager/scripts/spawn.sh`
+
 ## Layout
 
 
