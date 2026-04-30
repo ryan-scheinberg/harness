@@ -41,7 +41,7 @@ while IFS= read -r skill_md; do
   seen+="$name "
   names+=("$name")
   srcs+=("$src")
-done < <(find "$SKILLS_DIR" -name SKILL.md -not -path '*/.git/*' -not -path '*/tests/*' -not -path '*/eval-history/*' 2>/dev/null | sort)
+done < <(find "$SKILLS_DIR" -name SKILL.md -not -path '*/.git/*' -not -path '*/tests/*' -not -path '*/.eval-history/*' 2>/dev/null | sort)
 
 for td in "${LINK_ROOTS[@]}"; do
   mkdir -p "$td"
