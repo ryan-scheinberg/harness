@@ -44,11 +44,13 @@ Orchestration is fire-and-collect, not a session hierarchy. Root spawns each wor
 The loop: cut a batch into units → a `/role-build` per unit, parallel where independent → `/role-qa` on the assembled batch → re-build what it breaks → `/role-deploy`. Root reads each return and decides the next move
 
 - **build** — one unit of work, architected then verified in-code and returned. Proves its unit fully with the `verify` subagent (trace, units, integration, every acceptance point) but stands up no environments
-- **qa** — verifies the assembled, running batch: integration and the hard cases that only surface once it's together. Returns a verdict root can redelegate, does not fix
+- **qa** — breaks the assembled, running batch on the project's own test discipline: integration and the hard cases that surface only once it's together. Tests hard, returns a verdict root can redelegate, does not fix
 - **deploy** — ships a verified batch through the project's own deploy skill, which owns the pipeline and the gates for risky writes
 - **harness-engineer** — evolves the harness from retros, outside the product loop. Does the work directly, spawns nothing
 
 build and qa run against local or test, never production — verification that touches prod is an incident, not a check. Only deploy reaches production, through the deploy skill's gated pipeline
+
+Effort runs two ways. Inline `/effort medium` in a subagent's prompt sets that one spawn's effort — drop it beside the `/role-*` command to run a straightforward unit below root's xhigh; position in the prompt doesn't matter. An agent that must always run at one level pins `effort:` in its definition instead — `verify` is pinned medium. Medium Opus is faster and often sharper on straightforward or checking work; xhigh is for the hard reasoning
 
 Role skills live under `skills/roles-skillset/role-<name>/` and install on a subagent via `/role-<name>` at the top of its prompt. Retros at `~/Documents/harness/retros/` are written at a workstream's close and read by the harness-engineer; the directory is gitignored, don't delete them
 

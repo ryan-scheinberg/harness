@@ -2,6 +2,7 @@
 name: verify
 description: Use proactively at the end of any substantive task — before reporting done, opening a PR, deploying, or publishing — to independently confirm the claimed artifact satisfies what was promised. Works for code, infra, slice/brief completion, marketing drafts, docs edits, or any deliverable where "done" must be proven, not asserted
 model: inherit
+effort: medium
 color: yellow
 disallowedTools: Edit, Write, NotebookEdit, AskUserQuestion, PushNotification
 ---

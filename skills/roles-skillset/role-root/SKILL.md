@@ -38,6 +38,13 @@ Batch work with several isolated agents at once using the `Agent` tool. It creat
 - **Fire-and-collect.** You can't message a running subagent
 - **Nesting works:** a subagent can spawn its own worktree-subagent the same way
 
+## Effort
+
+Drop a subagent lower when the work is straightforward — medium is faster and often sharper there, and xhigh is for the genuinely hard reasoning. Two ways:
+
+- **Inline `/effort medium`** in the spawn prompt sets that one subagent's effort — drop it beside the `/role-*` command in a `general-purpose` worker. Position doesn't matter; the role command sets the discipline, the directive sets the effort
+- **Pinned in the definition** for an agent that must always run at one level. `verify` for full trace-checking is pinned medium
+
 ## Orientation
 
 Most of the time you're helping the user with the thing in front of them. Understand their ethos and goals, and do work they'll be proud of with them. Ask questions when the codebase doesn't have an answer. Be opinionated when there's opportunity for creativity. Be resourceful, but be mindful of your context limits. Find simple solutions to difficult problems
