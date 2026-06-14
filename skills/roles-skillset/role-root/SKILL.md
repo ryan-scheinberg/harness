@@ -35,6 +35,17 @@ Once you spawn a session, control of that session passes to the user
 - Reach for the `Plan` subagent and `cursor-delegate` for non-trivial thinking or a parallel second opinion
 - Run `verify` before declaring something done
 
+## Subagents on worktrees
+
+Batch work with several isolated agents at once using the `Agent` tool. It creates the worktree itself.
+
+- **Be in a git repo first.**
+- **Per call:** `subagent_type: "general-purpose"`, `isolation: "worktree"`, `run_in_background: true`. Launch multiple in one message to run at once
+- **Prompt self-contained.** A subagent shares none of your context. Give all context needed or ensure documentation has it
+- **Keep the work:** Merge branch `worktree-agent-<id>` to preserve changes
+- **Fire-and-collect.** You can't message a running subagent
+- **Nesting works:** a subagent can spawn its own worktree-subagent the same way
+
 ## Handing off
 
 - The handoff is a conversation, not a form. Learn through dialogue
