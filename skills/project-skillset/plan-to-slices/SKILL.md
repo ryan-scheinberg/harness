@@ -12,7 +12,7 @@ If there's no brief, tell the user to run `define-project` first. Slicing withou
 1. **Read the brief.** Scope, MVP, technical approach, risks
 2. **Explore the codebase** if one exists. Module boundaries, test patterns, what's already there. Slices land where seams already exist
 3. **Identify vertical slices.** Slice 1 is the thinnest end-to-end path that proves the core approach
-4. **Order by dependency and risk.** Uncertain integrations push forward so you learn early. User-facing value before internal polish. Clearly label dependencies so the manager can parallelize
+4. **Order by dependency and risk.** Uncertain integrations push forward so you learn early. User-facing value before internal polish. Clearly label dependencies so independent slices can run in parallel
 5. **Write acceptance criteria** — 3–5 observable outcomes per slice
 
 ## Slicing rules

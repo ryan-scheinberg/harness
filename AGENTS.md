@@ -35,34 +35,22 @@ Non-obvious bits:
 - **macOS Full Disk Access.** `crontab` needs FDA granted to the shell running the installer (System Settings → Privacy & Security → Full Disk Access → add Terminal/iTerm). Claude Code's own shell doesn't have FDA, so run `./schedules/install.sh` from a terminal you've granted access to
 - **`state/` is gitignored.** The wrapper only updates the stamp on exit-0 runs, so failures retry on the next tick instead of silently falling behind a day
 
-## Session hierarchy
+## Orchestration
 
-Root is the user's base session, started by running `claude` with no args (a zsh function in `~/.zshrc` injects `/role-root`; flags or a prompt bypass), running outside tmux. The user opens it for direct work and uses it to spawn other top-of-chain sessions: a `manager` for a single workstream, a `ceo` for a real portfolio, or a `harness-engineer` for harness work. After spawn, those sessions communicate directly with the user — root does not intermediate
+Root is the user's base session — `claude` with no args injects `/role-root` (a zsh function in `~/.zshrc`; a prompt or flags bypass it). It does the work directly when it fits one context, orchestrates when it doesn't, and is the user's only point of contact
 
-The **work lane** within a delegated workstream is a strict one-layer-down chain: **user → CEO → manager → architect/dev**, or — when spawned without a CEO — **user → manager → architect/dev**. `claude-session-manager/scripts/spawn.sh` derives the spawned session's manager from the spawner's `$CLAUDE_SESSION_NAME` — whoever runs spawn.sh becomes the new session's manager, no override. Spawned from a root session (no env var set), the manager field is empty, which is correct for top-of-chain sessions (CEO, harness-engineer, or a manager spawned directly by root)
+Orchestration is fire-and-collect, not a session hierarchy. Root spawns each worker as a `general-purpose` subagent on its own worktree (the `Agent` tool, `isolation: "worktree"`) and installs a role by opening the prompt with the role's slash command. The worker runs to done and returns to root — subagents don't message each other, don't stay resident, and never ping the user
 
-The **harness-engineer** runs on a separate lane, peer to the CEO. User-spawned only (typically through root), persistent across a work cycle, reads accumulating retros and evolves the harness itself. It does not run product work, does not direct the CEO, and no session reports to it
+The loop: cut a batch into units → a `/role-build` per unit, parallel where independent → `/role-qa` on the assembled batch → re-build what it breaks → `/role-deploy`. Root reads each return and decides the next move
 
-- **Root** is the user's daily driver. Does direct work most of the time, spawns a manager (single workstream), CEO (real portfolio), or harness-engineer (harness work) when handing off. User-spawned only, runs outside tmux
-- **CEO** spawns managers only. Routes work and holds the portfolio view; does not write code or produce briefs. Uses the `workstream-digest` subagent for the handoff brief at workstream close — does not read shipped implementation directly, context stays on leadership
-- **Manager** owns a workstream end-to-end. Spawns an architect when the work needs real slicing, reviews the draft brief before it reaches the user, then spawns one dev on the MVP slice and checks in with the CEO before later waves (up to 2 concurrent devs after). Fields dev questions, verifies final output, writes a retro at `~/Documents/harness/retros/YYYY-MM-DD-<slug>.md` before reporting complete, ships
-- **Architect** plans and exits. Drafts `PROJECT_BRIEF.md` solo, pings manager for review before grilling the user with `iterate-plan`, then produces `SLICES.md` and hands back. Does not supervise devs — that decouples planning from execution so devs have exactly one upward channel
-- **Dev** implements a single slice, verifies, reports back via `request-manager`
-- **Harness-engineer** evolves the harness from retros. Peer to CEO, user-spawned only, slow by design. Never touches product work
+- **build** — one unit of work, architected then verified in-code and returned. Proves its unit fully with the `verify` subagent (trace, units, integration, every acceptance point) but stands up no environments
+- **qa** — verifies the assembled, running batch: integration and the hard cases that only surface once it's together. Returns a verdict root can redelegate, does not fix
+- **deploy** — ships a verified batch through the project's own deploy skill, which owns the pipeline and the gates for risky writes
+- **harness-engineer** — evolves the harness from retros, outside the product loop. Does the work directly, spawns nothing
 
-Role skills live under `skills/roles-skillset/role-<name>/` and are applied at spawn time via `/role-<name>` (the slash command the spawn script invokes inside the new session). Which roles a session can spawn is declared in its own role skill body, not in `claude-session-manager` — `spawn.sh` passes the role name through unchanged, so hierarchy is enforced by role docs, not the script
+build and qa run against local or test, never production — verification that touches prod is an incident, not a check. Only deploy reaches production, through the deploy skill's gated pipeline
 
-Retros at `~/Documents/harness/retros/` are the evidence base the harness-engineer reads. Managers write them at workstream close; the directory is gitignored (private workstream detail). Don't delete them — they accumulate
-
-Direct user contact surfaces: root (the user's base session, primary channel), CEO (standing portfolio channel), harness-engineer (standing across a work cycle), and architect during `iterate-plan` (the grill, after manager has cleared the draft brief). Everything else reaches the user only by bubbling up the chain. Subagents (e.g. `verify`, `workstream-digest`) never contact the user — they return to their parent
-
-## Inter-session messaging
-
-Two skills wire the hierarchy: `request-manager` (subordinate → manager) and `respond-to-request` (manager → subordinate), both in `skills/harness-skillset/`. Transport is `tmux send-keys -t <session> -l "<text>"` followed by `tmux send-keys -t <session> Enter` — every spawned session lives inside a tmux session of the same name (the Terminal window is just a viewer that attaches to it). Delivery and submit are focus-independent, so multiple sessions can message each other concurrently without keystroke routing problems. Claude Code's TUI queues typed input when the target is mid-turn, so no polling, inbox files, or reply tracking
-
-- Session identity flows via env: spawn.sh exports `CLAUDE_SESSION_NAME` and `CLAUDE_SESSION_MANAGER` before `claude` launches. The registry at `~/.claude/session-registry.json` gained a `manager` field. Both message scripts read registry + env to route
-- `PushNotification` is the fallback for sessions with no manager configured — root, CEO, harness-engineer by default, plus any session root spawns directly (a manager or architect launched without going through a CEO first). Everyone else escalates through their own manager, even for launch/spend/compliance. Single upward channel per session, and only the top of the chain ever pings the user
-- `request-manager` does not end the agent's turn. Blocking asks (permission, unresolved tradeoff) require the agent to end the turn after sending so the reply lands as next input; non-blocking sends (status, slice-done, hand-off) keep working
+Role skills live under `skills/roles-skillset/role-<name>/` and install on a subagent via `/role-<name>` at the top of its prompt. Retros at `~/Documents/harness/retros/` are written at a workstream's close and read by the harness-engineer; the directory is gitignored, don't delete them
 
 ## Editing harness content
 
@@ -77,6 +65,6 @@ Match the surrounding file before writing anything new. Existing SKILL.md and ro
 - Drop end-of-line periods. Keep punctuation only where it separates mid-line clauses
 - Imperative verbs, sentence fragments where tighter. No "you should", "it's important", "remember to", "always"
 - Every rule carries its reason in one clause, not a paragraph. "Green tests are necessary, not sufficient" beats three sentences about testing discipline
-- Admit cognitive limits where real (manager cannot hold full dev context; architect cannot ship slices themselves). Keeps agents from faking capabilities they don't have
+- Admit cognitive limits where real (root can't hold every unit's full context; qa can't trust a unit's self-report). Keeps agents from faking capabilities they don't have
 - No meta-narration or trust-building filler. Describe what to do, skip how the agent should feel about doing it
-- Bold lead verb, then a fragment — the user's bullet format. Not "**Spawn devs:** This is how you should..." but "**Spawn devs** for parallelizable slices. Up to 3 concurrent"
+- Bold lead verb, then a fragment — the user's bullet format. Not "**Spawn a builder:** This is how you should..." but "**Spawn a builder** per unit, parallel where independent"

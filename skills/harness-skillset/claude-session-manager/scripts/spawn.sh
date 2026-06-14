@@ -31,7 +31,7 @@ main() {
 
   if [[ -z "$name" || -z "$role" || -z "$workdir" || -z "$initial" ]]; then
     echo "Usage: spawn.sh <name> <role> <workdir> \"<initial brief>\""
-    echo "Example: spawn.sh dev-kiwi dev ~/Documents/skillscake \"build the MVP slice\""
+    echo "Example: spawn.sh dev-kiwi dev ~/Documents/myproject \"build the MVP slice\""
     return 1
   fi
 

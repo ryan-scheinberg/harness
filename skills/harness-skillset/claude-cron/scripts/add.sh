@@ -2,7 +2,7 @@
 # Schedule a recurring `claude -p` run. Writes a spec to ~/Documents/harness/schedules/
 # and syncs the user's crontab.
 # Usage: add.sh <name> "<cron-schedule>" "<prompt>"
-# Example: add.sh morning-brief "0 9 * * *" "/skillscake-marketing-ideation"
+# Example: add.sh morning-brief "0 9 * * *" "draft my morning brief"
 #
 # Any 5-field cron expression is accepted. The installer adds a top-of-hour
 # catch-up tick alongside the user's schedule so a fire missed by laptop sleep
@@ -21,7 +21,7 @@ main() {
 
   if [[ -z "$name" || -z "$schedule" || -z "$prompt" ]]; then
     echo "Usage: add.sh <name> \"<cron-schedule>\" \"<prompt>\"" >&2
-    echo "Example: add.sh daily-angle \"0 9 * * *\" \"/skillscake-marketing-ideation\"" >&2
+    echo "Example: add.sh morning-brief \"0 9 * * *\" \"draft my morning brief\"" >&2
     return 1
   fi
 

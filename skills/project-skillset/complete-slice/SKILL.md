@@ -23,7 +23,7 @@ Take one slice from `SLICES.md` and ship it. Often for dev work, but might be a 
 
 8. **Close the slice.** Check the boxes in `SLICES.md`. Follow-up work, discovered edge cases, or risks land in the relevant future slice, or in a `## Notes` section at the bottom of `SLICES.md`
 
-9. **Report** with `request-manager`
+9. **Report** what you shipped and verified back to whoever ran you
 
 ## Scope
 
@@ -31,4 +31,4 @@ Feature work, infrastructure-as-code, migrations, instrumentation, perf, bug fix
 
 Not for: research spikes with no code deliverable, pure documentation, project planning (use `plan-to-slices`)
 
-Skills you lean on: `verify` subagent before declaring done, `cursor-delegate` for a second opinion or implementation partner
+Skills you lean on: the `verify` subagent before declaring done, and a subagent for a second opinion or implementation partner

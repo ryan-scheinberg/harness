@@ -21,7 +21,7 @@ Work through these tests in order. The first match wins
 
 **Test**: Would this fact be true in a different repo using the same tool or platform? If you swapped the repo but kept the tool, would the lesson still apply?
 
-Cross-repo knowledge about tools, platforms, workflows. Group by skillset folder (`project-skillset/`, `harness-skillset/`, `skillscake-skillset/`). Run `./skills/install.sh` from the harness repo root after adding or moving a skill directory
+Cross-repo knowledge about tools, platforms, workflows. Group by skillset folder (`project-skillset/`, `harness-skillset/`). Run `./skills/install.sh` from the harness repo root after adding or moving a skill directory
 
 **Guardrails**: Don't change `name:` — tied to symlinks and the loader. Edit `description:` only if triggering is wrong (fires when it shouldn't, or doesn't fire when it should)
 
@@ -33,7 +33,7 @@ Cross-repo knowledge about tools, platforms, workflows. Group by skillset folder
 
 Repo-specific context. Nearest file wins in nested structures; most agents read it automatically
 
-*Examples: Repo needs `npm ci` before tests. Build kept failing because of an undocumented env var*
+*Examples: Repo needs `npm ci` before tests. What a builder check covers here vs the full QA pass*
 
 ### Global CLAUDE.md (`~/Documents/harness/CLAUDE.md`, symlinked to `~/.claude/CLAUDE.md`)
 

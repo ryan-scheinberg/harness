@@ -16,7 +16,7 @@ bash scripts/add.sh <name> "<cron-schedule>" "<prompt>"
 Example:
 
 ```bash
-bash scripts/add.sh morning-brief "0 9 * * *" "/skillscake-marketing-ideation"
+bash scripts/add.sh morning-brief "0 9 * * *" "draft my morning brief"
 ```
 
 - `name` — kebab-case, unique; becomes the filename, log name, and stamp key
