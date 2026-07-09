@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Symlink every SKILL.md directory under skills/ (any depth) flat into
-# ~/.claude/skills/<name>/ and ~/.cursor/skills/<name>/. Safe to re-run.
+# ~/.claude/skills/<name>/. Safe to re-run.
 # Harness is the source of truth; existing destinations are overwritten.
 
 set -e
 
 SKILLS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(dirname "$SKILLS_DIR")
-LINK_ROOTS=("$HOME/.claude/skills" "$HOME/.cursor/skills")
+LINK_ROOTS=("$HOME/.claude/skills")
 # Legacy locations we migrate away from — any symlink pointing here is pruned.
 OLD_LOCATIONS=("$HOME/Documents/skills")
 

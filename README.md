@@ -8,10 +8,11 @@ Claude Code agent OS: skills, subagents, the global `CLAUDE.md`, safety hooks, a
 git clone https://github.com/ryan-scheinberg/harness.git ~/Documents/harness
 cd ~/Documents/harness
 
-./skills/install.sh                    # symlinks into ~/.claude/skills and ~/.cursor/skills
+./skills/install.sh                    # symlinks into ~/.claude/skills
 ./agents/install.sh                    # symlinks into ~/.claude/agents
 ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md   # one-time: global user instructions
 
+./codex/install.sh                     # optional: Codex adapter (writes ~/.codex/skills and ~/.codex/AGENTS.md)
 ./hooks/install.sh                     # optional: safety hooks (writes ~/.claude/settings.json)
 ./schedules/install.sh                 # optional: local cron jobs (writes crontab; needs `pip install croniter`)
 ```
@@ -34,16 +35,33 @@ claude() {
 
 Role skills live under `skills/roles-skillset/role-<name>/`. A subagent gets its role by opening its prompt with `/role-<name>`
 
+## Codex adapter
+
+Codex invokes skills with `$skill-name`, not Claude slash commands. `./codex/install.sh` installs shared skills into `~/.codex/skills`, and generates Codex-adapted copies of `role-*` skills there so the Claude role source files stay untouched
+
+The adapter also copies `CLAUDE.md` into ignored `codex/generated/AGENTS.md` and symlinks `~/.codex/AGENTS.md` to it. Codex reads that global file before work in every repository
+
+```bash
+codex() {
+  if (( $# == 0 )); then
+    command codex '$role-root'
+  else
+    command codex "$@"
+  fi
+}
+```
+
 ## Layout
 
 
 | Path         | What it is                                      | Installed by           | Where it goes                                                  |
 | ------------ | ----------------------------------------------- | ---------------------- | -------------------------------------------------------------- |
-| `skills/`    | SKILL.md directories grouped by skillset folder | `skills/install.sh`    | `~/.claude/skills/<name>` and `~/.cursor/skills/<name>` (flat) |
-| `agents/`    | Subagent definition files (`.md`)               | `agents/install.sh`    | `~/.claude/agents/<name>.md`                                   |
-| `CLAUDE.md`  | Global user instructions                        | manual `ln -s`         | `~/.claude/CLAUDE.md`                                          |
-| `hooks/`     | Native deny rules + PreToolUse bash gate        | `hooks/install.sh`     | Merged into `~/.claude/settings.json`                          |
-| `schedules/` | Local cron jobs with catch-up wrapper           | `schedules/install.sh` | Merged into the user's crontab                                 |
+| `skills/`    | SKILL.md directories grouped by skillset folder | `skills/install.sh`    | `~/.claude/skills/<name>` (flat)                                      |
+| `codex/`     | Codex adapter installer                         | `codex/install.sh`     | `~/.codex/skills/<name>`                                             |
+| `agents/`    | Subagent definition files (`.md`)               | `agents/install.sh`    | `~/.claude/agents/<name>.md`                                         |
+| `CLAUDE.md`  | Global user instructions                        | manual `ln -s`         | `~/.claude/CLAUDE.md`                                                |
+| `hooks/`     | Native deny rules + PreToolUse bash gate        | `hooks/install.sh`     | Merged into `~/.claude/settings.json`                                |
+| `schedules/` | Local cron jobs with catch-up wrapper           | `schedules/install.sh` | Merged into the user's crontab                                       |
 
 
 ## License

@@ -1,12 +1,13 @@
 # Harness repo — agent notes
 
-This repository is the **source of truth** for the user's Claude Code / Cursor harness. Skills, subagents, the global `CLAUDE.md`, safety hooks, and local schedules all live here and are version-controlled in one place.
+This repository is the **source of truth** for the user's Claude Code harness. Skills, subagents, the global `CLAUDE.md`, safety hooks, local schedules, and the optional Codex adapter all live here and are version-controlled in one place.
 
 ## Install / refresh
 
 | Command | What it does |
 | --- | --- |
-| `./skills/install.sh` | Discovers every `SKILL.md` under `skills/` (any depth, skipping `.git/`) and flat-symlinks each directory into `~/.claude/skills/<name>/` and `~/.cursor/skills/<name>/`. Prunes stale symlinks pointing into `$REPO_ROOT` or legacy `~/Documents/skills/`. You can run this |
+| `./skills/install.sh` | Discovers every `SKILL.md` under `skills/` (any depth, skipping `.git/`) and flat-symlinks each directory into `~/.claude/skills/<name>/`. Prunes stale symlinks pointing into `$REPO_ROOT` or legacy `~/Documents/skills/`. You can run this |
+| `./codex/install.sh` | Optional Codex adapter. Installs shared skills into `~/.codex/skills/<name>/`; non-role skills are symlinks, role skills are generated copies with Codex `$role-*` invocation wording so Claude role files stay untouched. Copies `CLAUDE.md` into ignored `codex/generated/AGENTS.md` and symlinks it to `~/.codex/AGENTS.md`. You can run this |
 | `./agents/install.sh` | Symlinks every `.md` under `agents/` into `~/.claude/agents/<name>.md`. Prunes stale symlinks pointing into `agents/`. You can run this |
 | `./hooks/install.sh` | Merges safety hooks (native deny rules + PreToolUse bash gate) into `~/.claude/settings.json`. Writes to user settings. The user will run this |
 | `./schedules/install.sh` | Syncs `schedules/*.cron` specs into the user's crontab under a delimited block. Writes to crontab, and needs macOS Full Disk Access. The user will run this |
