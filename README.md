@@ -1,6 +1,6 @@
 # Harness
 
-Claude Code agent OS: skills, subagents, the global `CLAUDE.md`, safety hooks, and local schedules. Each top-level dir has its own `install.sh`. Nothing is bundled, every installer is opt-in, and installers unconditionally overwrite their destinations
+Claude Code agent OS: skills, the global `CLAUDE.md`, safety hooks, and local schedules. Each top-level dir has its own `install.sh`. Nothing is bundled, every installer is opt-in, and installers unconditionally overwrite their destinations
 
 ## Install
 
@@ -9,7 +9,6 @@ git clone https://github.com/ryan-scheinberg/harness.git ~/Documents/harness
 cd ~/Documents/harness
 
 ./skills/install.sh                    # symlinks into ~/.claude/skills
-./agents/install.sh                    # symlinks into ~/.claude/agents
 ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md   # one-time: global user instructions
 
 ./codex/install.sh                     # optional: Codex adapter (writes ~/.codex/skills and ~/.codex/AGENTS.md)
@@ -21,7 +20,7 @@ Re-run each installer whenever you add, move, or rename anything in its director
 
 ## Starting a session
 
-Bare `claude` enters the **root** role — the user's base session, where direct work happens and from which `build`/`qa`/`deploy`/`harness-engineer` subagents get spawned to orchestrate larger work. Add this to `~/.zshrc` (or `~/.zprofile`) so a no-arg invocation hits root and any flagged invocation passes through:
+Bare `claude` enters the **root** role — the user's base session, where direct work happens and from which `build`/`verify`/`qa`/`deploy`/`harness-engineer` workers get spawned to orchestrate larger work. Add this to `~/.zshrc` (or `~/.zprofile`) so a no-arg invocation hits root and any flagged invocation passes through:
 
 ```bash
 claude() {
@@ -58,9 +57,8 @@ codex() {
 | ------------ | ----------------------------------------------- | ---------------------- | -------------------------------------------------------------- |
 | `skills/`    | SKILL.md directories grouped by skillset folder | `skills/install.sh`    | `~/.claude/skills/<name>` (flat)                                      |
 | `codex/`     | Codex adapter installer                         | `codex/install.sh`     | `~/.codex/skills/<name>`                                             |
-| `agents/`    | Subagent definition files (`.md`)               | `agents/install.sh`    | `~/.claude/agents/<name>.md`                                         |
 | `CLAUDE.md`  | Global user instructions                        | manual `ln -s`         | `~/.claude/CLAUDE.md`                                                |
-| `hooks/`     | Native deny rules + PreToolUse bash gate        | `hooks/install.sh`     | Merged into `~/.claude/settings.json`                                |
+| `hooks/`     | Native deny rules + PreToolUse bash gate + codex timeout | `hooks/install.sh`     | Merged into `~/.claude/settings.json`                                |
 | `schedules/` | Local cron jobs with catch-up wrapper           | `schedules/install.sh` | Merged into the user's crontab                                       |
 
 

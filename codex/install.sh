@@ -63,11 +63,21 @@ write_codex_role() {
   mkdir -p "$dest"
   printf 'generated from %s\n' "$src" > "$dest/.harness-codex-generated"
   LC_ALL=C perl -0pe '
+    s#Drop a subagent lower when the work is straightforward.*?never reaches codex[^\n]*#Your reasoning effort is fixed at session launch (`model_reasoning_effort`) — root launched you at xhigh. No per-skill effort exists in codex#s;
+    s#Builders run on codex \(GPT 5\.6 Luna\) through the `codex:codex-rescue` subagent.*?nothing reaches back into a running subagent#Spawn a subagent per unit of work, its prompt opening the role'\''s `\$` skill invocation plus the context it needs — the skill installs the discipline, you supply the specifics. Implementation subagents run `gpt-5.6-luna` at xhigh\n\n- **`\$role-build`** — one unit of work: architected, built, self-proven, committed, returned. One subagent per independent unit; they run in parallel\n- **`\$role-qa`** — the tough batch test through the project'\''s own test skills, once the units are merged. Its verdict gates the deploy\n- **`\$role-deploy`** — ships the verified batch through the project'\''s deploy skill\n- **`\$role-harness-engineer`** — evolve the harness itself (skills, `AGENTS.md`, hooks) when real work exposes a gap. Outside the product loop\n\nThe loop: cut the work into units → a `\$role-build` luna subagent per unit → merge the finished units to main yourself → `\$role-qa` on the assembled batch → spawn luna to fix what it finds, QA'\''s evidence in the prompt → `\$role-deploy`. You read each return and decide the next move; nothing reaches back into a running subagent#s;
+    s@## Subagents on worktrees\n\nBatch work with several isolated agents at once using the `Agent` tool\. It creates the worktree itself.*?worktree-subagent the same way@## Subagents\n\nBatch work with several subagents at once\n\n- **Prompt self-contained.** A subagent shares none of your context. Give all context needed or ensure documentation has it\n- **Isolate parallel units** so they don'\''t collide, and merge finished work back yourself\n- **Fire-and-collect.** Read each return and decide the next move@s;
+    s#Reach for the `Plan` subagent#Reach for a planning subagent#g;
+    s#invoke the relevant skill via the Skill tool#mention the relevant skill#g;
+    s#with the help of `verify` and subagents#with the help of `\$role-verify` and subagents#g;
+    s#- `PushNotification` the user when you'\''re blocked or a batch is done and they may have stepped away#- Say plainly when you'\''re blocked or a batch lands — the user reads your session from the phone#g;
+    s#Skills you lean on: `PushNotification`, the#Skills you lean on: the#g;
     s/When the user runs `claude`, you appear/When the user runs bare `codex`, you appear/g;
     s/role'\''s slash command/role'\''s skill invocation/g;
     s#/role-#\$role-#g;
     s#beside the `\$role-\*` command#beside the `\$role-*` skill invocation#g;
     s#role command#role invocation#g;
+    s#then spawn a `general-purpose` subagent per slice on its own worktree, each running `complete-slice`, and merge the finished slice branches back into yours#then spawn a subagent per slice, each running `complete-slice`, and fold the finished slices back into yours#g;
+    s#Spawn a `general-purpose` subagent on `\$role-verify` with `/effort medium` — independent eyes#Spawn a subagent with `\$role-verify` — independent eyes#g;
   ' "$src/SKILL.md" > "$dest/SKILL.md"
 }
 
