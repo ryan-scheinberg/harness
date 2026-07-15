@@ -8,12 +8,19 @@ This repository is the **source of truth** for the user's Claude Code harness. S
 | --- | --- |
 | `./skills/install.sh` | Discovers every `SKILL.md` under `skills/` (any depth, skipping `.git/`) and flat-symlinks each directory into `~/.claude/skills/<name>/`. Prunes stale symlinks pointing into `$REPO_ROOT` or legacy `~/Documents/skills/`. You can run this |
 | `./codex/install.sh` | Optional Codex adapter. Installs shared skills into `~/.codex/skills/<name>/`; non-role skills are symlinks, role skills are generated copies with Codex `$role-*` invocation wording so Claude role files stay untouched. Copies `CLAUDE.md` into ignored `codex/generated/AGENTS.md` and symlinks it to `~/.codex/AGENTS.md`. You can run this |
+| `./codex-agents/install.sh` | Installs native Codex custom-agent TOML into `~/.codex/agents/`, where Codex discovers each `agent_type` directly. Agent files pin runtime only; the delegated `$role-*` skill owns behavior. You can run this |
 | `./hooks/install.sh` | Merges safety hooks (native deny rules + the PreToolUse bash gate and codex-timeout hooks) into `~/.claude/settings.json`. Writes to user settings. The user will run this |
 | `./schedules/install.sh` | Syncs `schedules/*.cron` specs into the user's crontab under a delimited block. Writes to crontab, and needs macOS Full Disk Access. The user will run this |
 
 `CLAUDE.md` is a one-time manual symlink: `ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md`
 
 Installers are Bash 3.2-compatible so they run on macOS's default shell. Re-run an installer after adding, moving, or renaming anything in its directory. The repo is the source of truth: installers unconditionally overwrite their destinations, no adoption check or diff dance
+
+## Codex ↔ Claude companions
+
+[openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) remains the Claude Code → Codex integration. Codex → Claude deliberately has no bridge plugin: root runs one foreground `claude -p --model fable --effort xhigh` command for the assembled `/role-qa` gate. That keeps the handoff visible and blocking instead of adding a courier, job store, hooks, and setup lifecycle for one call.
+
+The QA call unsets API/cloud-provider overrides and uses the Claude subscription OAuth credential saved by `claude auth login --claudeai`. Run that one shell call with Codex full local access because the default workspace sandbox cannot read the macOS Keychain. A valid login is reused by future sessions; setup is not part of the normal loop. The exact command and verdict contract live in the installed `role-root` skill
 
 ## Constraints
 
