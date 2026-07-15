@@ -15,14 +15,14 @@ Spawn with `agent_type: "luna_builder"` per implementation unit, its prompt open
 ```bash
 env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u ANTHROPIC_BASE_URL \
   -u CLAUDE_CODE_USE_BEDROCK -u CLAUDE_CODE_USE_VERTEX -u CLAUDE_CODE_USE_FOUNDRY \
-  claude -p --model fable --effort xhigh --dangerously-skip-permissions --no-session-persistence \
-  "/role-qa ... exact <base>..HEAD range ..."
+  claude -p --model fable --effort medium --dangerously-skip-permissions --no-session-persistence \
+  "/role-qa ... exact <base>..HEAD range ... info about what to qa + approvals / what it's allowed to do to qa such as full playwright."
 ```
 
 Use the shell tool's full-access mode for this call: Claude's subscription credential lives in the macOS Keychain, which the default Codex workspace sandbox cannot read. This is one blocking call, not a Codex courier or tracked plugin job. Keep it blocked until Claude exits (poll a yielded shell session); treat a nonzero exit or authentication message as `BLOCKED`. Fable must return `PASS`, `FAIL`, or `BLOCKED` and must not edit or fix code
 
 - **`$role-build` via `agent_type: "luna_builder"`** — one unit of work: architected, built, self-proven, committed, returned. One agent per independent unit; they run in parallel
-- **Fable QA** — the foreground `claude -p --model fable --effort xhigh` call above, with the assembled-batch prompt beginning `/role-qa`
+- **Fable QA** — the foreground `claude -p --model fable` call above, with the assembled-batch prompt beginning `/role-qa`
 - **`$role-deploy`** — ships the verified batch through the project's deploy skill
 - **`$role-harness-engineer`** — evolve the harness itself (skills, `AGENTS.md`, hooks) when real work exposes a gap. Outside the product loop
 
@@ -41,6 +41,7 @@ The loop: cut the work into units → a `luna_builder` agent per unit, each prom
 Batch work with several subagents at once
 
 - **Prompt self-contained.** A subagent shares none of your context. Give all context needed or ensure documentation has it
+- **Worktrees.** Before spawning, create a unique worktree and branch per unit; pass its absolute path, require `cd` there, and verify `git rev-parse --show-toplevel` differs from Root before editing
 - **Isolate parallel units** so they don't collide, and merge finished work back yourself
 - **Fire-and-collect.** Read each return and decide the next move
 
