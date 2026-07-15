@@ -12,17 +12,14 @@ SKILLS_DIR="$REPO_ROOT/skills"
 ROLE_SKILLS_DIR="$SKILLS_DIR/roles-skillset"
 CODEX_ROLE_SKILLS_DIR="$CODEX_DIR/roles"
 LINK_ROOT="$HOME/.codex/skills"
-GLOBAL_SRC="$REPO_ROOT/CLAUDE.md"
-GLOBAL_GENERATED_DIR="$CODEX_DIR/generated"
-GLOBAL_GENERATED="$GLOBAL_GENERATED_DIR/AGENTS.md"
+CODEX_GLOBAL_SRC="$CODEX_DIR/AGENTS.md"
+LEGACY_GENERATED_DIR="$CODEX_DIR/generated"
 GLOBAL_LINK="$HOME/.codex/AGENTS.md"
 
-mkdir -p "$LINK_ROOT" "$GLOBAL_GENERATED_DIR"
+mkdir -p "$LINK_ROOT"
 
 install_global_agents() {
-  [[ -f "$GLOBAL_SRC" ]] || { echo "missing $GLOBAL_SRC"; exit 1; }
-
-  cp "$GLOBAL_SRC" "$GLOBAL_GENERATED"
+  [[ -f "$CODEX_GLOBAL_SRC" ]] || { echo "missing $CODEX_GLOBAL_SRC; create the separate local Codex instructions before installing"; exit 1; }
 
   if [[ -e "$GLOBAL_LINK" && ! -L "$GLOBAL_LINK" ]]; then
     echo "error: refusing to overwrite non-symlink Codex global instructions: $GLOBAL_LINK" >&2
@@ -30,7 +27,12 @@ install_global_agents() {
   fi
 
   rm -f "$GLOBAL_LINK"
-  ln -s "$GLOBAL_GENERATED" "$GLOBAL_LINK"
+  ln -s "$CODEX_GLOBAL_SRC" "$GLOBAL_LINK"
+
+  if [[ -f "$LEGACY_GENERATED_DIR/AGENTS.md" ]]; then
+    rm "$LEGACY_GENERATED_DIR/AGENTS.md"
+  fi
+  rmdir "$LEGACY_GENERATED_DIR" 2>/dev/null || true
 
   if [[ -f "$HOME/.codex/AGENTS.override.md" ]]; then
     echo "warning: ~/.codex/AGENTS.override.md exists and will override $GLOBAL_LINK" >&2
@@ -127,4 +129,4 @@ done
 install_global_agents
 
 echo "Codex skills: ${#names[@]} installed into $LINK_ROOT"
-echo "Codex global instructions: $GLOBAL_LINK -> $GLOBAL_GENERATED"
+echo "Codex global instructions: $GLOBAL_LINK"
