@@ -50,6 +50,7 @@ install_multi_agent_config() {
   printf '%s\n' \
     "$CONFIG_START" \
     '[features.multi_agent_v2]' \
+    'tool_namespace = "agents"' \
     'hide_spawn_agent_metadata = false' \
     'max_concurrent_threads_per_session = 8' \
     "$CONFIG_END" >> "$tmp"
