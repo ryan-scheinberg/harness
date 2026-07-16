@@ -8,7 +8,7 @@ This repository is the **source of truth** for the user's Claude Code harness. S
 | --- | --- |
 | `./skills/install.sh` | Discovers every `SKILL.md` under `skills/` (any depth, skipping `.git/`) and flat-symlinks each directory into `~/.claude/skills/<name>/`. Prunes stale symlinks pointing into `$REPO_ROOT` or legacy `~/Documents/skills/`. You can run this |
 | `./codex/install.sh` | Optional Codex adapter. Installs shared skills into `~/.codex/skills/<name>/`; non-role skills are symlinks, role skills are generated copies with Codex `$role-*` invocation wording so Claude role files stay untouched. Symlinks `~/.codex/AGENTS.md` to the separate ignored personal `codex/AGENTS.md`; it never reads `CLAUDE.md`. You can run this |
-| `./codex-agents/install.sh` | Installs native Codex custom-agent TOML into `~/.codex/agents/`, where Codex discovers each `agent_type` directly. Agent files pin runtime only; the delegated `$role-*` skill owns behavior. You can run this |
+| `./codex-agents/install.sh` | Installs native Codex custom-agent TOML into `~/.codex/agents/` and a marked MultiAgent V2 block into `~/.codex/config.toml`. The block exposes custom role/model selection and sets eight total V2 slots; unrelated config stays untouched. You can run this |
 | `./hooks/install.sh` | Merges safety hooks (native deny rules + the PreToolUse bash gate and codex-timeout hooks) into `~/.claude/settings.json`. Writes to user settings. The user will run this |
 | `./schedules/install.sh` | Syncs `schedules/*.cron` specs into the user's crontab under a delimited block. Writes to crontab, and needs macOS Full Disk Access. The user will run this |
 

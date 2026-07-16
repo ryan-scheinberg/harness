@@ -12,7 +12,7 @@ cd ~/Documents/harness
 ln -sf "$PWD/CLAUDE.md" ~/.claude/CLAUDE.md   # one-time: global user instructions
 
 ./codex/install.sh                     # optional: Codex adapter (writes ~/.codex/skills and ~/.codex/AGENTS.md)
-./codex-agents/install.sh              # optional: native Codex agents (writes ~/.codex/agents)
+./codex-agents/install.sh              # optional: native agents + V2 defaults (~/.codex/agents, config.toml)
 ./hooks/install.sh                     # optional: safety hooks (writes ~/.claude/settings.json)
 ./schedules/install.sh                 # optional: local cron jobs (writes crontab; needs `pip install croniter`)
 ```
@@ -41,7 +41,7 @@ Codex invokes skills with `$skill-name`, not Claude slash commands. `./codex/ins
 
 The Codex adapter keeps its global instructions separate from Claude. It symlinks `~/.codex/AGENTS.md` to the ignored personal `codex/AGENTS.md`; create that local file before installing the adapter. It never reads or rewrites `CLAUDE.md`
 
-`./codex-agents/install.sh` installs the thin native `luna_builder` agent into `~/.codex/agents/`, which Codex discovers directly. Root selects the role with `agent_type`; `task_name` is only the spawn handle. Its TOML pins the builder model and effort while the delegated prompt begins `$role-build`; Fable QA is a single blocking `claude -p --model fable --effort xhigh` call owned by `role-root`, so there is no reverse bridge plugin to install or maintain
+`./codex-agents/install.sh` installs the thin native `luna_builder` agent into `~/.codex/agents/`, which Codex discovers directly, plus a marked block in `~/.codex/config.toml` that exposes role/model overrides and gives MultiAgent V2 eight total slots. Root selects the role with `agent_type`; on V2 it also passes `fork_turns: "none"` because a full-history fork rejects custom role/model overrides. Its TOML pins the builder model and effort while the delegated prompt begins `$role-build`; Fable QA is a single blocking `claude -p --model fable --effort xhigh` call owned by `role-root`, so there is no reverse bridge plugin to install or maintain
 
 ```bash
 codex() {
@@ -60,7 +60,7 @@ codex() {
 | ------------ | ----------------------------------------------- | ---------------------- | -------------------------------------------------------------- |
 | `skills/`    | SKILL.md directories grouped by skillset folder | `skills/install.sh`    | `~/.claude/skills/<name>` (flat)                                      |
 | `codex/`     | Codex adapter installer                         | `codex/install.sh`     | `~/.codex/skills/<name>`                                             |
-| `codex-agents/` | Native Codex custom agents                  | `codex-agents/install.sh` | `~/.codex/agents/<name>.toml`                                     |
+| `codex-agents/` | Native Codex custom agents + V2 defaults    | `codex-agents/install.sh` | `~/.codex/agents/<name>.toml`, managed block in `~/.codex/config.toml` |
 | `codex/AGENTS.md` | Ignored personal Codex global instructions | `codex/install.sh` | `~/.codex/AGENTS.md` |
 | `CLAUDE.md`  | Global user instructions                        | manual `ln -s`         | `~/.claude/CLAUDE.md`                                                |
 | `hooks/`     | Native deny rules + PreToolUse bash gate + codex timeout | `hooks/install.sh`     | Merged into `~/.claude/settings.json`                                |

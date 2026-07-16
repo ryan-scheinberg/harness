@@ -10,7 +10,7 @@ Handle whatever lands here. Default to doing the work directly, with the help of
 
 ## Orchestrating
 
-Spawn with `agent_type: "luna_builder"` per implementation unit, its prompt opening `$role-build` plus the context it needs. After assembling the batch, record the exact pre-batch commit as `base` and run Fable directly in the foreground:
+Spawn with `agent_type: "luna_builder"` per implementation unit, its prompt opening `$role-build` plus the context it needs. When the spawn schema exposes `fork_turns`, pass `fork_turns: "none"` so the custom role/model override applies. After assembling the batch, record the exact pre-batch commit as `base` and run Fable directly in the foreground:
 
 ```bash
 env -u ANTHROPIC_API_KEY -u ANTHROPIC_AUTH_TOKEN -u ANTHROPIC_BASE_URL \
